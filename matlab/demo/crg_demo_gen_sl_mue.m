@@ -39,7 +39,6 @@ function [ier] = crg_demo_gen_sl_mue(filename)
 
 %% check input parameter
 
-ier = -1;
 if ~exist('filename','var') || ~ischar(filename)
     error('CRG:checkError', 'No valid filename is spezified');
 end
@@ -51,11 +50,6 @@ end
 uinc =  0.2;
 ubeg =  0;
 uend =  200;
-
-u = (ubeg:uinc:uend)';
-c = {};
-s = {};
-b = {};
 
 %% curvature
 
@@ -98,17 +92,17 @@ b = { ...
 %                 |
 uwp_road_sect  =          [  ubeg                                                                         uend  ];    % road width       u sections
 uwp_road_prof  =          [  1                                                                            1     ];
-vwp_road_sect  =  0     + [  3                                     : -0.5 :                              -3     ];    % road width       v sect
+vwp_road_sect  =  0     + (  3                                     : -0.5 :                              -3     );    % road width       v sect
 vwp_road_prof  =  1     * [  ones(size(vwp_road_sect))                                                          ];
 
 ulp_lane_sect  =          [  ubeg                                                                         uend  ];    % left lane        u sections
 ulp_lane_prof  =          [  1                                                                            1     ];
-vlp_lane_sect  =  1.25  + [  1                             : -0.2 :                                      -1     ];    % left lane        v sect
+vlp_lane_sect  =  1.25  + (  1                             : -0.2 :                                      -1     );    % left lane        v sect
 vlp_lane_prof  =  1     * [  1             0.8 0.8 0.6 0.6    0.6       0.6 0.6 0.8 0.8                   1     ];
 
 ulr_lane_sect  =  100   + [  0    10                                                              50     60     ];    % left lane        u sections
 ulr_lane_prof  =          [  1     0.8                                                             0.8    1     ];
-vlr_lane_sect  =  1.25  + [  1                             : -0.2 :                                      -1     ];    % left lane        v sect
+vlr_lane_sect  =  1.25  + (  1                             : -0.2 :                                      -1     );    % left lane        v sect
 vlr_lane_prof  =  1     * [  ones(size(vlr_lane_sect))                                                          ];
 
 urp_lane_sect  =          [  ubeg                   30  40    50   80     90                              uend  ];    % right lane       u sections

@@ -39,7 +39,6 @@ function [ier] = crg_demo_gen_sl_surf(filename)
 
 %% check input parameter
 
-ier = -1;
 if ~exist('filename','var') || ~ischar(filename)
     error('CRG:checkError', 'No valid filename is spezified');
 end
@@ -51,11 +50,6 @@ end
 uinc =  0.5;
 ubeg =  0;
 uend =  200;
-
-u = (ubeg:uinc:uend)';
-c = {};
-s = {};
-b = {};
 
 %% curvature
 
@@ -107,25 +101,25 @@ vwp_road_sect  =          [  3                                                  
 vwp_road_prof  =  0     * [  ones(size(vwp_road_sect))                                                          ];
 uwr_road_sect  =          [  ubeg                                                                         uend  ];
 uwr_road_prof  =  1     * [  1                                                                            1     ];
-vwr_road_sect  =          [  vwp_road_sect                                                                      ];
+vwr_road_sect  =             vwp_road_sect                                                                       ;
 vwr_road_prof  =  0     * [  ones(size(vwr_road_sect))                                                          ];
 
-ulp_lane_sect  =  100   + [                                L1Seq                                                ];    % left lane        u sections
+ulp_lane_sect  =  100   +                                  L1Seq                                                 ;    % left lane        u sections
 ulp_lane_prof  =  1     * [                       sin(2*pi*L1Seq/L1Hz)                                          ];
 vlp_lane_sect  =  1.25  + [  1                                                                           -1     ];    % left lane        v sect
 vlp_lane_prof  =  0.05  * [  1                                                                            1     ];
 ulr_lane_sect  =  0     + [  ubeg                                                                         uend  ];
 ulr_lane_prof  =  1     * [  1                                                                            1     ];
-vlr_lane_sect  =  0     + [  vlp_lane_sect                                                                      ];
+vlr_lane_sect  =  0     +    vlp_lane_sect                                                                       ;
 vlr_lane_prof  =  0.02  * [  ones(size(vlr_lane_sect))                                                          ];
 
-urp_lane_sect  =  120   + [                                   L3Seq                                             ];    % right lane       u sections
+urp_lane_sect  =  120   +                                     L3Seq                                              ;    % right lane       u sections
 urp_lane_prof  =  1     * [                          sin(2*pi*L3Seq/L3Hz)                                       ];
-vrp_lane_sect  = -1.25  + [  1                           : -0.125 :                                      -1     ];    % right lane       v sect
+vrp_lane_sect  = -1.25  + (  1                           : -0.125 :                                      -1     );    % right lane       v sect
 vrp_lane_prof  =  0.03  * [  ones(size(vrp_lane_sect))                                                          ];
 urr_lane_sect  =  0     + [  ubeg                                                                         uend  ];
 urr_lane_prof  =  1     * [  1                                                                            1     ];
-vrr_lane_sect  =  0     + [  vrp_lane_sect                                                                      ];
+vrr_lane_sect  =  0     +    vrp_lane_sect                                                                       ;
 vrr_lane_prof  =  0.01  * [  ones(size(vrr_lane_sect))                                                          ];
 
 uwp_edge_sect  =          [  ubeg     ubeg+10                                                 uend-10     uend  ];    % road width       u sections

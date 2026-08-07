@@ -39,7 +39,6 @@ function [ier] = crg_demo_gen_sl_road(filename)
 
 %% check input parameter
 
-ier = -1;
 if ~exist('filename','var') || ~ischar(filename)
     error('CRG:checkError', 'No valid filename is spezified');
 end
@@ -94,8 +93,8 @@ ulp_mark_prof  =  1     * [  1                                           1     ]
 vlp_mark_sect  =  3.5   + [  0.11     0.1                    -0.1      -0.11   ];
 vlp_mark_prof  =  0.003 * [  0        1                       1         0      ];
 
-ucp_mark_sect  =          [  u                                                 ];    % center road marking
-ucp_mark_prof  =  1     * [  (mod(u,10)<0.4*10)                                ];    % 10 m period with 4m marking
+ucp_mark_sect  =             u                                                  ;    % center road marking
+ucp_mark_prof  =  1     * (  mod(u,10)<0.4*10                                  );    % 10 m period with 4m marking
 vcp_mark_sect  =  0     + [  0.11     0.1                    -0.1       -0.11  ];
 vcp_mark_prof  =  0.005 * [  0        1                        1         0     ];
 
@@ -111,13 +110,13 @@ vlp_gutt_prof  = -0.01 * [  0        1                       1         0      ];
 
 ulp_rut__sect  =          [  ubeg                                        uend  ];    % rut left hand side
 ulp_rut__prof  =  1     * [  1                                           1     ];
-vlp_rut__sect  = -0.75  + [                   0.3:-0.05:-0.3                   ];
-vlp_rut__prof  = -0.005 * [          (cos(pi*(0.3:-0.05:-0.3)/0.6)).^2         ];
+vlp_rut__sect  = -0.75  + (                   0.3:-0.05:-0.3                   );
+vlp_rut__prof  = -0.005 * (          (cos(pi*(0.3:-0.05:-0.3)/0.6)).^2         );
 
 urp_rut__sect  =          [  ubeg                                        uend  ];    % rut right hand side
 urp_rut__prof  =  1     * [  1                                           1     ];
-vrp_rut__sect  = -2.75  + [                   0.3:-0.05:-0.3                   ];
-vrp_rut__prof  = -0.008 * [          (cos(pi*(0.3:-0.05:-0.3)/0.6)).^2         ];
+vrp_rut__sect  = -2.75  + (                   0.3:-0.05:-0.3                   );
+vrp_rut__prof  = -0.008 * (          (cos(pi*(0.3:-0.05:-0.3)/0.6)).^2         );
 
 upvp = { ...
        ; { 'Profile' [ uwp_road_sect ; uwp_road_prof ] [ vwp_road_sect ; vwp_road_prof ] } ...  % road with lanes
