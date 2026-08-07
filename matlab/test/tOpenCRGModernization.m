@@ -1,113 +1,159 @@
-function tests = tOpenCRGModernization()
-%TOPENCRGMODERNIZATION Regression tests for MATLAB modernization work.
+classdef tOpenCRGModernization < matlab.unittest.TestCase
+    %TOPENCRGMODERNIZATION Regression tests for MATLAB modernization work.
 
-tests = functiontests(localfunctions);
-end
+    properties
+        Repository (1, 1) string
+        MatlabFolder (1, 1) string
+        CrgTextFolder (1, 1) string
+        CrgBinaryFolder (1, 1) string
+    end
 
-function setupOnce(testCase)
-testFolder = string(fileparts(mfilename("fullpath")));
-matlabFolder = fileparts(testFolder);
-repoRoot = fileparts(matlabFolder);
+    properties (TestParameter)
+        representativeFile = makeRepresentativeFiles()
+        borderCase = makeBorderCases()
+    end
 
-testCase.TestData.Repository = repoRoot;
-testCase.TestData.Matlab = matlabFolder;
-testCase.TestData.CrgText = fullfile(repoRoot, "crg-txt");
-testCase.TestData.CrgBinary = fullfile(repoRoot, "crg-bin");
+    methods (TestClassSetup)
+        function addSourcePaths(testCase)
+            testFolder = string(fileparts(mfilename("fullpath")));
+            testCase.MatlabFolder = fileparts(testFolder);
+            testCase.Repository = fileparts(testCase.MatlabFolder);
+            testCase.CrgTextFolder = fullfile(testCase.Repository, "crg-txt");
+            testCase.CrgBinaryFolder = fullfile(testCase.Repository, "crg-bin");
 
-testCase.applyFixture(matlab.unittest.fixtures.PathFixture(matlabFolder));
-testCase.applyFixture(matlab.unittest.fixtures.PathFixture(fullfile(matlabFolder, "lib")));
-testCase.applyFixture(matlab.unittest.fixtures.PathFixture(testFolder));
-end
+            testCase.applyFixture(matlab.unittest.fixtures.PathFixture(testCase.MatlabFolder));
+            testCase.applyFixture(matlab.unittest.fixtures.PathFixture(fullfile(testCase.MatlabFolder, "lib")));
+            testCase.applyFixture(matlab.unittest.fixtures.PathFixture(testFolder));
+        end
+    end
 
-function testSelectedFormattedChannel(testCase)
-file = fullfile(testCase.TestData.CrgText, "handmade_curved.crg");
-allChannels = ipl_read(file);
-selected = ipl_read(file, struct("channel", "long section at v =  0.000,m"));
-channelIndex = find(strcmp(selected.kd_def{1}, allChannels.kd_def), 1);
+    methods (Test)
+        function selectedFormattedChannelReturnsSingleColumn(testCase)
+            file = fullfile(testCase.CrgTextFolder, "handmade_curved.crg");
+            allChannels = ipl_read(file);
+            selected = ipl_read(file, struct("channel", "long section at v =  0.000,m"));
+            channelIndex = find(strcmp(selected.kd_def{1}, allChannels.kd_def), 1);
 
-verifyEqual(testCase, size(selected.kd_dat, 2), 1);
-verifyEqual(testCase, selected.kd_dat, allChannels.kd_dat(:, channelIndex));
-end
+            testCase.verifyEqual(size(selected.kd_dat, 2), 1);
+            testCase.verifyEqual(selected.kd_dat, allChannels.kd_dat(:, channelIndex));
+        end
 
-function testLongRecordsAreTruncatedOnWrite(testCase)
-fixture = testCase.applyFixture(matlab.unittest.fixtures.TemporaryFolderFixture());
-file = fullfile(fixture.Folder, "long-record.crg");
+        function longRecordsAreTruncatedOnWrite(testCase)
+            fixture = testCase.applyFixture(matlab.unittest.fixtures.TemporaryFolderFixture());
+            file = fullfile(fixture.Folder, "long-record.crg");
 
-data.struct = {repmat('A', 1, 90)};
-data.kd_def = {"channel one,m"};
-data.kd_dat = single((1:3).');
+            data.struct = {repmat('A', 1, 90)};
+            data.kd_def = {"channel one,m"};
+            data.kd_dat = single((1:3).');
 
-verifyWarning(testCase, @() ipl_write(data, file, "LRFI"), "IPL:recLengthExceeded");
-lines = readlines(file, Encoding="ISO-8859-1");
-verifyLessThanOrEqual(testCase, strlength(lines(1)), 72);
-end
+            testCase.verifyWarning(@() ipl_write(data, file, "LRFI"), "IPL:recLengthExceeded");
+            lines = readlines(file, Encoding="ISO-8859-1");
+            testCase.verifyLessThanOrEqual(strlength(lines(1)), 72);
+        end
 
-function testCrgReadRepresentativeSamples(testCase)
-textFile = fullfile(testCase.TestData.CrgText, "handmade_curved.crg");
-binaryFile = fullfile(testCase.TestData.CrgBinary, "belgian_block.crg");
+        function crgReadRepresentativeSamples(testCase, representativeFile)
+            file = testCase.fullfileForCase(representativeFile);
+            data = crg_read(file);
 
-textData = crg_read(textFile);
-binaryData = crg_read(binaryFile);
+            testCase.verifyClass(data.z, "single");
+            testCase.verifyGreaterThanOrEqual(size(data.z, 1), 2);
+            testCase.verifyGreaterThanOrEqual(size(data.z, 2), 2);
+        end
 
-verifyClass(testCase, textData.z, "single");
-verifyClass(testCase, binaryData.z, "single");
-verifyGreaterThanOrEqual(testCase, size(textData.z, 1), 2);
-verifyGreaterThanOrEqual(testCase, size(binaryData.z, 2), 2);
-end
+        function evaluationKernelsPreserveShapes(testCase)
+            data = crg_read(fullfile(testCase.CrgBinaryFolder, "belgian_block.crg"));
+            uValues = linspace(data.head.ubeg, data.head.uend, 25);
+            vValues = linspace(data.head.vmin, data.head.vmax, 25);
+            uvPoints = [uValues(:) vValues(:)];
 
-function testEvaluationKernelsPreserveShapes(testCase)
-data = crg_read(fullfile(testCase.TestData.CrgBinary, "belgian_block.crg"));
-u = linspace(data.head.ubeg, data.head.uend, 25);
-v = linspace(data.head.vmin, data.head.vmax, 25);
-puv = [u(:) v(:)];
+            phi = crg_eval_u2phi(data, uValues);
+            curvature = crg_eval_u2crv(data, uValues);
+            [uIndices, vIndices] = crg_eval_uv2iuiv(data, uValues, vValues);
+            zValues = crg_eval_uv2z(data, uvPoints);
+            xyPoints = crg_eval_uv2xy(data, uvPoints);
 
-phi = crg_eval_u2phi(data, u);
-crv = crg_eval_u2crv(data, u);
-[iu, iv] = crg_eval_uv2iuiv(data, u, v);
-z = crg_eval_uv2z(data, puv);
-xy = crg_eval_uv2xy(data, puv);
+            testCase.verifySize(phi, [1 25]);
+            testCase.verifySize(curvature, [1 25]);
+            testCase.verifySize(uIndices, [1 25]);
+            testCase.verifySize(vIndices, [1 25]);
+            testCase.verifySize(zValues, [25 1]);
+            testCase.verifySize(xyPoints, [25 2]);
+            testCase.verifyTrue(all(isfinite(xyPoints), "all"));
+        end
 
-verifySize(testCase, phi, [1 25]);
-verifySize(testCase, crv, [1 25]);
-verifySize(testCase, iu, [1 25]);
-verifySize(testCase, iv, [1 25]);
-verifySize(testCase, z, [25 1]);
-verifySize(testCase, xy, [25 2]);
-verifyTrue(testCase, all(isfinite(xy), "all"));
-end
+        function uv2zVectorizedMatchesScalarCalls(testCase, representativeFile, borderCase)
+            testCase.verifyUv2zScalarEquivalence(representativeFile, borderCase);
+        end
 
-function testUv2zVectorizedMatchesScalarCalls(testCase)
-files = [
-    fullfile(testCase.TestData.CrgText, "handmade_curved.crg")
-    fullfile(testCase.TestData.CrgBinary, "belgian_block.crg")
-    ];
+        function crgIsequalIdentifiesSameData(testCase)
+            data = crg_read(fullfile(testCase.CrgTextFolder, "handmade_curved.crg"));
+            [isEqual, differenceData] = crg_isequal(data, data);
 
-for file = files.'
-    baseData = crg_read(file);
-    u = linspace(baseData.head.ubeg - 2*baseData.head.uinc, baseData.head.uend + 2*baseData.head.uinc, 40).';
-    v = linspace(baseData.head.vmin - 1, baseData.head.vmax + 1, 40).';
-    puv = [u v];
+            testCase.verifyTrue(logical(isEqual));
+            testCase.verifyEmpty(differenceData.err);
+        end
 
-    for bdmu = 0:4
-        for bdmv = 0:4
-            data = baseData;
-            data.opts.bdmu = bdmu;
-            data.opts.bdmv = bdmv;
-            vectorized = crg_eval_uv2z(data, puv);
-            scalar = zeros(size(vectorized));
-            for k = 1:size(puv, 1)
-                scalar(k) = crg_eval_uv2z(data, puv(k, :));
+        function crgIsequalDetectsGridChange(testCase)
+            referenceData = crg_read(fullfile(testCase.CrgTextFolder, "handmade_curved.crg"));
+            changedData = referenceData;
+            changedData.z(1, 1) = changedData.z(1, 1) + single(0.1);
+
+            [isEqual, differenceData] = crg_isequal(referenceData, changedData);
+
+            testCase.verifyFalse(logical(isEqual));
+            testCase.verifyGreaterThan(max(differenceData.mean(:)), 0);
+        end
+
+        function metricsSuiteRuns(testCase)
+            results = opencrg_modernization_metrics();
+
+            testCase.verifyGreaterThan(height(results), 3);
+            testCase.verifyTrue(all(ismember( ...
+                ["Metric", "Value", "Unit", "Notes"], string(results.Properties.VariableNames))));
+        end
+    end
+
+    methods (Access = private)
+        function file = fullfileForCase(testCase, representativeFile)
+            switch representativeFile.Folder
+                case "text"
+                    folder = testCase.CrgTextFolder;
+                case "binary"
+                    folder = testCase.CrgBinaryFolder;
             end
-            verifyEqual(testCase, isnan(vectorized), isnan(scalar));
+            file = fullfile(folder, representativeFile.Name);
+        end
+
+        function verifyUv2zScalarEquivalence(testCase, representativeFile, borderCase)
+            data = crg_read(testCase.fullfileForCase(representativeFile));
+            uValues = linspace(data.head.ubeg - 2*data.head.uinc, data.head.uend + 2*data.head.uinc, 40).';
+            vValues = linspace(data.head.vmin - 1, data.head.vmax + 1, 40).';
+            uvPoints = [uValues vValues];
+            data.opts.bdmu = borderCase.U;
+            data.opts.bdmv = borderCase.V;
+
+            vectorized = crg_eval_uv2z(data, uvPoints);
+            scalar = arrayfun(@(rowIndex) crg_eval_uv2z(data, uvPoints(rowIndex, :)), (1:size(uvPoints, 1)).');
             finiteMask = isfinite(vectorized) & isfinite(scalar);
-            verifyEqual(testCase, vectorized(finiteMask), scalar(finiteMask), AbsTol=1e-10);
+
+            testCase.verifyEqual(isnan(vectorized), isnan(scalar));
+            testCase.verifyEqual(vectorized(finiteMask), scalar(finiteMask), AbsTol=1e-10);
         end
     end
 end
+
+function representativeFile = makeRepresentativeFiles()
+representativeFile = struct( ...
+    "handmadeCurved", struct("Folder", "text", "Name", "handmade_curved.crg"), ...
+    "belgianBlock", struct("Folder", "binary", "Name", "belgian_block.crg"));
 end
 
-function testMetricsSuiteRuns(testCase)
-results = opencrg_modernization_metrics();
-verifyGreaterThan(testCase, height(results), 3);
-verifyTrue(testCase, all(ismember(["Metric", "Value", "Unit", "Notes"], string(results.Properties.VariableNames))));
+function borderCase = makeBorderCases()
+borderCase = struct();
+for borderModeU = 0:4
+    for borderModeV = 0:4
+        fieldName = sprintf("u%dv%d", borderModeU, borderModeV);
+        borderCase.(fieldName) = struct("U", borderModeU, "V", borderModeV);
+    end
+end
 end
