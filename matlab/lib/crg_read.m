@@ -442,8 +442,8 @@ ichanb = 0;
 nchanv = 0;
 nposv  = 0;
 nnumv  = 0;
-dchanv = [];
-ichanv = [];
+dchanv = zeros(1, length(ipl.kd_def));
+ichanv = zeros(1, length(ipl.kd_def));
 for i=1:length(ipl.kd_def)
     hc = ipl.kd_def{i};
     fields = parseCsvFields(hc, 2);
@@ -478,11 +478,13 @@ for i=1:length(ipl.kd_def)
         end
         if strcmp(hunit, 'm') % register only with valid unit, report errors below
             nchanv = nchanv + 1;
-            dchanv(nchanv) = hd; %#ok<AGROW>
-            ichanv(nchanv) = i; %#ok<AGROW>
+            dchanv(nchanv) = hd;
+            ichanv(nchanv) = i;
         end
     end
 end
+dchanv = dchanv(1:nchanv);
+ichanv = ichanv(1:nchanv);
 if (nposv > 0) && (nnumv > 0)
     error('inconsistent long section definition in CRG file %s', file)
 end
