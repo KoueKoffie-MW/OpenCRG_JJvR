@@ -42,10 +42,9 @@ dispRes = 1;
 
 mdat = crg_read('demo7.crg');
 
-data = mdat;
 data = crg_b2z(mdat);
 
-[crgEqual, dd] = crg_isequal(mdat, data);
+[~, dd] = crg_isequal(mdat, data);
 
 if dispRes, crg_show_isequal(dd); end
 
@@ -53,10 +52,9 @@ if dispRes, crg_show_isequal(dd); end
 
 mdat = crg_read('demo8.crg');
 
-data = mdat;
 data = crg_s2z(mdat);
 
-[crgEqual, dd] = crg_isequal(mdat, data);
+[~, dd] = crg_isequal(mdat, data);
 
 if dispRes, crg_show_isequal(dd); end
 
@@ -64,11 +62,10 @@ if dispRes, crg_show_isequal(dd); end
 
 mdat = crg_read('demo8.crg');
 
-data = mdat;
 data = crg_s2z(mdat);
-data = crg_b2z(mdat);
+data = crg_b2z(data);
 
-[crgEqual, dd] = crg_isequal(mdat, data);
+[~, dd] = crg_isequal(mdat, data);
 
 if dispRes, crg_show_isequal(dd); end
 
@@ -81,7 +78,7 @@ crg2 = crg_cut_iuiv(crg0, [500, 1000]);
 
 crg3 = crg_append(crg1, crg2);
 
-[crgEqual, dd] = crg_isequal(crg0, crg3);
+[~, dd] = crg_isequal(crg0, crg3);
 
 if dispRes, crg_show_isequal(dd); end
 
@@ -94,7 +91,7 @@ crg2 = crg_cut_iuiv(crg0, [500, 1000]);
 
 crg3 = crg_append(crg1, crg2);
 
-[crgEqual, dd] = crg_isequal(crg0, crg3);
+[~, dd] = crg_isequal(crg0, crg3);
 
 if dispRes, crg_show_isequal(dd); end
 
@@ -107,7 +104,7 @@ crg2 = crg_cut_iuiv(crg0, [500, 1000]);
 
 crg3 = crg_append(crg1, crg2);
 
-[crgEqual, dd] = crg_isequal(crg0, crg3);
+[~, dd] = crg_isequal(crg0, crg3);
 
 if dispRes, crg_show_isequal(dd); end
 
@@ -120,7 +117,7 @@ crg1 = crg_cut_iuiv(crg0, [1, 501]);
 crg2 = crg_cut_iuiv(crg0, [500, 1000]);
 crg3 = crg_append(crg1, crg2);
 
-[crgEqual, dd] = crg_isequal(crg0, crg3);
+[~, dd] = crg_isequal(crg0, crg3);
 
 if dispRes, crg_show_isequal(dd); end
 
@@ -133,7 +130,7 @@ crg2 = crg_cut_iuiv(crg0, [500, 1000]);
 
 crg3 = crg_append(crg1, crg2);
 
-[crgEqual, dd] = crg_isequal(crg0, crg3);
+[~, dd] = crg_isequal(crg0, crg3);
 
 if dispRes, crg_show_isequal(dd); end
 
@@ -146,7 +143,7 @@ crg2 = crg_cut_iuiv(crg0, [500, 1000]);
 
 crg3 = crg_append(crg1, crg2);
 
-[crgEqual, dd] = crg_isequal(crg0, crg3);
+[~, dd] = crg_isequal(crg0, crg3);
 
 if dispRes, crg_show_isequal(dd); end
 
@@ -158,7 +155,7 @@ crg2 = crg_cut_iuiv(crg0, [300, 1000]);
 
 crg3  = crg_append(crg1, crg2 );
 
-[crgEqual, dd] = crg_isequal(crg0, crg3);
+[~, dd] = crg_isequal(crg0, crg3);
 
 if dispRes, crg_show_isequal(dd); end
 
@@ -171,7 +168,7 @@ crg2 = crg_cut_iuiv(crg0, [300, 1000]);
 
 crg3 = crg_append(crg1, crg2 );
 
-[crgEqual, dd] = crg_isequal(crg0, crg3);
+[~, dd] = crg_isequal(crg0, crg3);
 
 if dispRes, crg_show_isequal(dd); end
 
@@ -181,7 +178,7 @@ data = crg_read('demo7.crg');
 
 exdata = crg_ext_banking(data);
 
-[crgEqual, dd] = crg_isequal(data, exdata);
+[~, dd] = crg_isequal(data, exdata);
 
 if dispRes, crg_show_isequal(dd); end
 
@@ -191,7 +188,7 @@ data = crg_read('demo8.crg');
 
 exdata = crg_ext_slope(data, 0.001);
 
-[crgEqual, dd] = crg_isequal(data, exdata);
+[~, dd] = crg_isequal(data, exdata);
 
 if dispRes, crg_show_isequal(dd); end
 
@@ -202,7 +199,7 @@ data = crg_read('demo8.crg');
 exdata = crg_ext_banking(data, 0.001);
 exdata = crg_ext_slope(exdata, 0.001);
 
-[crgEqual, dd] = crg_isequal(data, exdata);
+[~, dd] = crg_isequal(data, exdata);
 
 if dispRes, crg_show_isequal(dd); end
 
@@ -215,7 +212,7 @@ data = crg_rerender(data, [0.02 0.02]);
 dat = crg_rerender(data, [0.01 0.01]);
 dat = crg_rerender(dat, [0.02 0.02]);
 
-[crgEqual, dd] = crg_isequal(data, dat);
+[~, dd] = crg_isequal(data, dat);
 
 if dispRes, crg_show_isequal(dd); end
 
@@ -231,7 +228,7 @@ dat = crg_rerender(dat, [0.01 0.01]);
 dat = crg_cut_iuiv(dat, [1 size(data.z,1)]);
 data = crg_cut_iuiv(data, [1 size(data.z,1)], [1 size(dat.z,2)]);
 
-[crgEqual, dd] = crg_isequal(data, dat);
+[~, dd] = crg_isequal(data, dat);
 
 if dispRes, crg_show_isequal(dd); end
 
@@ -247,7 +244,7 @@ dat = crg_rerender(dat, [0.01 0.01]);
 dat = crg_cut_iuiv(dat, [1 size(data.z,1)]);
 data = crg_cut_iuiv(data, [1 size(data.z,1)], [1 size(dat.z,2)]);
 
-[crgEqual, dd] = crg_isequal(data, dat);
+[~, dd] = crg_isequal(data, dat);
 
 if dispRes, crg_show_isequal(dd); end
 
@@ -258,6 +255,6 @@ dat = crg_read('../crg-bin/belgian_block.crg');
 exdata = crg_ext_banking(dat, 0.0000000000003);
 exdata = crg_ext_slope(exdata);
 
-[crgEqual, dd] = crg_isequal(dat, exdata);
+[~, dd] = crg_isequal(dat, exdata);
 
 if dispRes, crg_show_isequal(dd); end
