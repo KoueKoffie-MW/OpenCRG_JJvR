@@ -107,7 +107,8 @@ data.filenm = filename;
 nl = 0;
 
 % read structured data
-data.struct = cell(1,0);
+structLines = cell(1,nmp);
+structCount = 0;
 state = 0;
 while 1
     hc = fgetl(fid);
@@ -126,7 +127,7 @@ while 1
     switch state
         case 0 % outside $name block
             if strncmp(hc, '$', 1)
-                if strcmp(strtok(hc,' !'), '$') % detect block end marker
+                if strcmp(firstIplToken(hc), '$') % detect block end marker
                     error('IPL:invalidFile', 'block end marker outside named block in file %s line %d', filename, nl)
                 elseif strncmp(hc, '$$', 2)
                     break % end of (correctly) structured data
@@ -134,7 +135,7 @@ while 1
                 state = 1;
             end
         case 1 % inside $name block
-            if strcmp(strtok(hc,' !'), '$') % detect block end marker
+            if strcmp(firstIplToken(hc), '$') % detect block end marker
                 state = 0;
             elseif strncmp(hc, '$', 1) % detect other block marker
                 if ~strncmp(hc, '$$', 2) % it is no deeper block marker
@@ -142,8 +143,13 @@ while 1
                 end
             end
     end
-    data.struct{end+1} = hc;
+    structCount = structCount + 1;
+    if structCount > numel(structLines)
+        structLines(end+1:end+nmp) = cell(1,nmp);
+    end
+    structLines{structCount} = hc;
 end
+data.struct = structLines(1:structCount);
 
 if ~ischar(hc) % end of file, no sequential data available
     fclose(fid);
@@ -153,26 +159,39 @@ end
 % extract and evaluate $KD_DEFINITION block
 [kd_definition, data.struct] = sdf_cut(data.struct, 'KD_DEFINITION');
 
-data.kd_def = cell(1,0);
-data.kd_ind = cell(1,0);
-data.kd_oth = cell(1,0);
+definitionCount = numel(kd_definition);
+data.kd_def = cell(1,definitionCount);
+data.kd_ind = cell(1,definitionCount);
+data.kd_oth = cell(1,definitionCount);
+defCount = 0;
+indCount = 0;
+othCount = 0;
 
 type = 'NONE';
-for i = 1:length(kd_definition)
+for i = 1:definitionCount
     hc = kd_definition{i};
     if strncmp(hc, '*', 1), continue, end % skip comment lines
-    hc = deblank(regexprep(hc, '!+.*', ''));  % erase inline comments
+    commentStart = strfind(hc, '!');
+    if ~isempty(commentStart), hc = hc(1:commentStart(1)-1); end
+    hc = deblank(hc);
+    if numel(hc) < 2, continue, end
     switch hc(1:2)
         case '#:'
             type = hc(3:end);
         case 'U:'
-            data.kd_ind{end+1} = hc(3:end);
+            indCount = indCount + 1;
+            data.kd_ind{indCount} = hc(3:end);
         case 'D:'
-            data.kd_def{end+1} = hc(3:end);
+            defCount = defCount + 1;
+            data.kd_def{defCount} = hc(3:end);
         otherwise
-            data.kd_oth{end+1} = hc;
+            othCount = othCount + 1;
+            data.kd_oth{othCount} = hc;
     end
 end
+data.kd_def = data.kd_def(1:defCount);
+data.kd_ind = data.kd_ind(1:indCount);
+data.kd_oth = data.kd_oth(1:othCount);
 
 nc = length(data.kd_def);
 
@@ -387,6 +406,15 @@ if isempty(tmp)
     out = strtrim(in);
 else
     out = [strtrim(in(1:tmp(1)-1)),',',strtrim(in(tmp(1)+1:end))];
+end
+end
+
+function token = firstIplToken(line)
+delimiter = find(line == ' ' | line == '!', 1);
+if isempty(delimiter)
+    token = line;
+else
+    token = line(1:delimiter-1);
 end
 end
 
