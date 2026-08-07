@@ -77,15 +77,13 @@ num1 = size(p, 2); % nu - 1
 
 %% work on all points
 
-for ip = 1:np
-    iu = floor((pu(ip) - ubeg) / uinc) + 1;
-    if iu < 1
-        phi(ip) = pbeg;
-    elseif iu > num1
-        phi(ip) = pend;
-    else
-        phi(ip) = double(p(iu));
-    end
-end
+iu = floor((pu(1:np) - ubeg) / uinc) + 1;
+before = iu < 1;
+after = iu > num1;
+inside = ~(before | after);
+
+phi(before) = pbeg;
+phi(after) = pend;
+phi(inside) = double(p(iu(inside)));
 
 end

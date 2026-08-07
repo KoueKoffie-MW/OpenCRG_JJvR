@@ -321,7 +321,7 @@ end
 %% add timestamp
 
 crgdat.struct{end+1} = ...
-    sprintf('* written by %s at %s', mfilename, datestr(now, 31));
+    sprintf('* written by %s at %s', mfilename, char(datetime("now", Format="yyyy-MM-dd HH:mm:ss")));
 
 %% generate data for $KD_DEFINITION block and data array
 

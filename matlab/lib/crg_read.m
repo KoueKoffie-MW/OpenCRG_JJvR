@@ -59,7 +59,7 @@ end
 
 %% look for OpenCRG file reference
 
-[fref s] = sdf_cut(ipl.struct, 'ROAD_CRG_FILE');
+[fref, s] = sdf_cut(ipl.struct, 'ROAD_CRG_FILE');
 if size(s, 2) < size(ipl.struct, 2)
     data.opts = struct; % found OpenCRG file reference
     ipl.struct = s;
@@ -118,8 +118,9 @@ if isfield(data, 'opts')
         hc = regexprep(hc, '!+.*', ''); % erase inline comments
 
         % all unknown keywords and many syntax flaws will be silently ignored
-        [oname, ovalue] = strread(hc, '%s%f', 1, 'delimiter', '=');
-        switch lower(deblank(oname{1}))
+        [oname, ovalue, ok] = parseNameNumber(hc);
+        if ~ok, continue, end
+        switch lower(char(oname))
 %         OpenCRG border modes in u and v directions
             case 'border_mode_u'
                 data.opts.bdmu = ovalue;
@@ -188,8 +189,9 @@ if isfield(data, 'mods')
         hc = regexprep(hc, '!+.*', ''); % erase inline comments
 
         % all unknown keywords and many syntax flaws will be silently ignored
-        [mname, mvalue] = strread(hc, '%s%f', 1, 'delimiter', '=');
-        switch lower(deblank(mname{1}))
+        [mname, mvalue, ok] = parseNameNumber(hc);
+        if ~ok, continue, end
+        switch lower(char(mname))
 %         OpenCRG scaling
             case 'scale_z_grid'
                 data.mods.szgd = mvalue;
@@ -259,8 +261,9 @@ for i = 1:length(block)
     hc = regexprep(hc, '!+.*', ''); % erase inline comments
 
     % all unknown keywords and many syntax flaws will be silently ignored
-    [hname, hvalue] = strread(hc, '%s%f', 1, 'delimiter', '=');
-    switch lower(deblank(hname{1}))
+    [hname, hvalue, ok] = parseNameNumber(hc);
+    if ~ok, continue, end
+    switch lower(char(hname))
         case 'reference_line_start_u'
             data.head.ubeg = hvalue;
         case 'reference_line_end_u'
@@ -328,7 +331,7 @@ data = crg_check_head(data);
 
 [block, ipl.struct] = sdf_cut(ipl.struct, 'ROAD_CRG_MPRO');
 
-if length(block) > 0
+if ~isempty(block)
     data.mpro = struct;
 
     data.mpro.gell = struct;
@@ -342,18 +345,18 @@ if length(block) > 0
         hc = regexprep(hc, '!+.*', ''); % erase inline comments
 
         % all unknown keywords and many syntax flaws will be silently ignored
-        [pname, pvalue] = strread(hc, '%s%s', 1, 'delimiter', '=');
-        pvalue = pvalue{1};
-        switch lower(deblank(pname{1}))
+        [pname, pvalue, ok] = parseNameText(hc);
+        if ~ok, continue, end
+        switch lower(char(pname))
             case 'gell_nm'
-                data.mpro.gell.nm = regexp(pvalue, '(?<=\'')\w+', 'match', 'once');
+                data.mpro.gell.nm = parseQuotedName(pvalue);
             case 'gell_a'
                 data.mpro.gell.a = str2double(pvalue);
             case 'gell_b'
                 data.mpro.gell.b = str2double(pvalue);
                 %
             case 'tran_nm'
-                data.mpro.tran.nm = regexp(pvalue, '(?<=\'')\w+', 'match', 'once');
+                data.mpro.tran.nm = parseQuotedName(pvalue);
             case 'tran_ds'
                 data.mpro.tran.ds = str2double(pvalue);
             case 'tran_rx'
@@ -370,14 +373,14 @@ if length(block) > 0
                 data.mpro.tran.tz = str2double(pvalue);
                 %
             case 'lell_nm'
-                data.mpro.lell.nm = regexp(pvalue, '(?<=\'')\w+', 'match', 'once');
+                data.mpro.lell.nm = parseQuotedName(pvalue);
             case 'lell_a'
                 data.mpro.lell.a = str2double(pvalue);
             case 'lell_b'
                 data.mpro.lell.b = str2double(pvalue);
                 %
             case 'proj_nm'
-                data.mpro.proj.nm = regexp(pvalue, '(?<=\'')\w+', 'match', 'once');
+                data.mpro.proj.nm = parseQuotedName(pvalue);
             case 'proj_f0'
                 data.mpro.proj.f0 = str2double(pvalue);
             case 'proj_p0'
@@ -410,17 +413,15 @@ if isfield(data.head, 'ubeg'), ubeg = data.head.ubeg; end
 
 for i=1:length(ipl.kd_ind)
     hc = ipl.kd_ind{i};
-    [ht, hc, hb, hi] = strread(hc, '%s%s%f%f', 1, 'delimiter', ',', 'emptyvalue', NaN);
-    ht = deblank(strjust(ht{1}, 'left')); %#ok<TRIM2>
-    hc = deblank(strjust(hc{1}, 'left')); %#ok<TRIM2>
+    fields = parseCsvFields(hc, 4);
+    ht = char(fields(1));
+    hunit = char(fields(2));
+    hb = str2double(fields(3));
+    hi = str2double(fields(4));
     if strcmp(ht, 'reference line u')
-        if strcmp(hc, 'm')
-            if length(hb) == 1
-                if ~isnan(hb), ubeg = hb; end
-            end
-            if length(hi) == 1
-                if ~isnan(hi), uinc = hi; end
-            end
+        if strcmp(hunit, 'm')
+            if ~isnan(hb), ubeg = hb; end
+            if ~isnan(hi), uinc = hi; end
         end
     end
 end
@@ -445,23 +446,23 @@ dchanv = [];
 ichanv = [];
 for i=1:length(ipl.kd_def)
     hc = ipl.kd_def{i};
-    [ht, hc] = strread(hc, '%s%s', 1, 'delimiter', ',');
-    ht = deblank(strjust(ht{1}, 'left')); %#ok<TRIM2>
-    hc = deblank(strjust(hc{1}, 'left')); %#ok<TRIM2>
+    fields = parseCsvFields(hc, 2);
+    ht = char(fields(1));
+    hunit = char(fields(2));
     if strcmp(ht, 'reference line phi')
-        if strcmp(hc, 'rad')
+        if strcmp(hunit, 'rad')
             ichanp = i;
         else
             error('reference line phi unit error in CRG file %s', file)
         end
     elseif strcmp(ht, 'reference line slope')
-        if strcmp(hc, 'm/m')
+        if strcmp(hunit, 'm/m')
             ichans = i;
         else
             error('reference line slope unit error in CRG file %s', file)
         end
     elseif strcmp(ht, 'reference line banking')
-        if strcmp(hc, 'm/m')
+        if strcmp(hunit, 'm/m')
             ichanb = i;
         else
             error('reference line banking unit error in CRG file %s', file)
@@ -474,7 +475,7 @@ for i=1:length(ipl.kd_def)
             nnumv = nnumv + 1;
             hd = str2double(ht);
         end
-        if strcmp(hc, 'm') % register only with valid unit, report errors below
+        if strcmp(hunit, 'm') % register only with valid unit, report errors below
             nchanv = nchanv + 1;
             dchanv(nchanv) = hd; %#ok<AGROW>
             ichanv(nchanv) = i; %#ok<AGROW>
@@ -548,4 +549,44 @@ data = crg_single(data);
 
 data = crg_check(data);
 
+end
+
+function [name, value, ok] = parseNameNumber(line)
+[name, valueText, ok] = parseNameText(line);
+if ~ok
+    value = NaN;
+    return
+end
+
+value = sscanf(valueText, '%f', 1);
+ok = ~isempty(value);
+if ~ok
+    value = NaN;
+end
+end
+
+function [name, valueText, ok] = parseNameText(line)
+separator = strfind(line, '=');
+ok = ~isempty(separator);
+if ~ok
+    name = "";
+    valueText = "";
+    return
+end
+
+name = strtrim(string(line(1:separator(1)-1)));
+valueText = strtrim(string(line(separator(1)+1:end)));
+ok = name ~= "" && valueText ~= "";
+end
+
+function value = parseQuotedName(text)
+value = regexp(char(text), '(?<=\'')\w+', 'match', 'once');
+end
+
+function fields = parseCsvFields(line, fieldCount)
+fields = split(string(line), ",");
+if numel(fields) < fieldCount
+    fields(numel(fields)+1:fieldCount) = "";
+end
+fields = strtrim(fields(1:fieldCount));
 end

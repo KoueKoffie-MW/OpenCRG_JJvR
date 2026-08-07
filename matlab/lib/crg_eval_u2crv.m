@@ -73,15 +73,8 @@ num2 = size(rc, 2); % nu - 2
 
 %% work on all points
 
-for ip = 1:np
-    iu = floor((pu(ip) - ubeg) / uinc);
-    if iu < 1
-        crv(ip) = 0;
-    elseif iu > num2
-        crv(ip) = 0;
-    else
-        crv(ip) = rc(iu);
-    end
-end
+iu = floor((pu(1:np) - ubeg) / uinc);
+inside = iu >= 1 & iu <= num2;
+crv(inside) = rc(iu(inside));
 
 end

@@ -48,6 +48,9 @@ function [ier] = ipl_write(data, filename, type)
 % *****************************************************************
 
 [nr, nc] = size(data.kd_dat);
+if isstring(filename)
+    filename = char(filename);
+end
 
 % IPLOS file machineformat: ieee-be (IEEE floating point with big-endian byte ordering)
 % IPLOS file encoding: ISO-8859-1 (latin1, explicitly supported since Matlab R2006a)
@@ -59,6 +62,7 @@ end
 if fid < 0
     error('file %s could not be opened for write', filename)
 end
+fileCleanup = onCleanup(@() closeOpenFile(fid));
 
 % write structured data
 
@@ -71,13 +75,13 @@ if isfield(data, 'struct')
             'data.struct{%d} too long:\n %s\nwill only be used as:\n %s', ...
             i, data.struct{i}, hc)
         end
-        fprintf(fid, '%s\n', data.struct{i});
+        fprintf(fid, '%s\n', hc);
     end
 end
 
 % write date
 
-fprintf(fid, '* written by %s at %s\n', mfilename, datestr(now, 31));
+fprintf(fid, '* written by %s at %s\n', mfilename, char(datetime("now", Format="yyyy-MM-dd HH:mm:ss")));
 
 % write definition block for sequential data
 
@@ -94,7 +98,7 @@ if isfield(data, 'kd_ind')
             'data.kd_ind{%d} too long:\n %s\nwill only be used as:\n %s', ...
             i, data.kd_ind{i}, hc)
         end
-        fprintf(fid, 'U:%s\n', data.kd_ind{i});
+        fprintf(fid, 'U:%s\n', hc);
     end
 end
 
@@ -110,7 +114,7 @@ for i = 1:length(data.kd_def)
             'data.kd_def{%d} too long:\n %s\nwill only be used as:\n %s', ...
             i, data.kd_def{i}, hc)
         end
-    fprintf(fid, 'D:%s\n', data.kd_def{i});
+    fprintf(fid, 'D:%s\n', hc);
 end
 
 if isfield(data, 'kd_oth')
@@ -122,7 +126,7 @@ if isfield(data, 'kd_oth')
             'data.kd_oth{%d} too long:\n %s\nwill only be used as:\n %s', ...
             i, data.kd_oth{i}, hc)
         end
-        fprintf(fid, '%s\n', data.kd_oth{i});
+        fprintf(fid, '%s\n', hc);
     end
 end
 
@@ -137,35 +141,9 @@ fprintf(fid, '%s\n', hc);
 
 switch type
     case 'KRBI'
-        try
-            fwrite(fid, data.kd_dat', 'float32');
-        catch
-            % transposing big data.kd_dat can result in "Out of memory"
-            % problems. A workaround is to write it record by record,
-            % which gives a second chance:
-            for ir = 1:nr
-                fwrite(fid, data.kd_dat(ir, :), 'float32');
-            end
-        end
-        % pad with NaN to full multiple of 80 data bytes
-        for i = 1:mod(-nc*nr,20)
-            fwrite(fid, NaN, 'float32');
-        end
+        writeBinaryRows(fid, data.kd_dat, 'float32', 20);
     case 'KDBI'
-        try
-            fwrite(fid, data.kd_dat', 'float64');
-        catch
-            % transposing big data.kd_dat can result in "Out of memory"
-            % problems. A workaround is to write it record by record,
-            % which gives a second chance:
-            for ir = 1:nr
-                fwrite(fid, data.kd_dat(ir, :), 'float64');
-            end
-        end
-        % pad with NaN to full multiple of 80 data bytes
-        for i = 1:mod(-nc*nr,10)
-            fwrite(fid, NaN, 'float64');
-        end
+        writeBinaryRows(fid, data.kd_dat, 'float64', 10);
     case 'LRFI'
         for ir = 1:nr
             for ic = 1:nc
@@ -203,3 +181,26 @@ switch type
 end
 
 ier = fclose(fid);
+end
+
+function writeBinaryRows(fid, values, precision, paddingMultiple)
+[nr, nc] = size(values);
+maxChunkElements = 5e6;
+chunkRows = max(1, floor(maxChunkElements/max(nc, 1)));
+
+for rowStart = 1:chunkRows:nr
+    rowEnd = min(rowStart+chunkRows-1, nr);
+    fwrite(fid, values(rowStart:rowEnd, :).', precision);
+end
+
+paddingCount = mod(-nc*nr, paddingMultiple);
+if paddingCount > 0
+    fwrite(fid, NaN(1, paddingCount), precision);
+end
+end
+
+function closeOpenFile(fid)
+if fid > 0 && any(openedFiles() == fid)
+    fclose(fid);
+end
+end

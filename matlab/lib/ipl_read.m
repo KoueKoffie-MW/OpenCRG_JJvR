@@ -62,9 +62,12 @@ function [data] = ipl_read(filename, opts)
 nmp = 20000;    %pre-allocate DATA.kd_dat size to increase performance
 options.dtype   = 'single';
 options.channel = '';
+if isstring(filename)
+    filename = char(filename);
+end
 
 % check number of input arguments
-error(nargchk(1, 2, nargin))
+narginchk(1, 2)
 
 % check options
 if nargin == 2
@@ -99,6 +102,7 @@ end
 if fid < 0
     error('IPL:fileNotAvailable', 'file %s could not be opened for read', filename)
 end
+fileCleanup = onCleanup(@() closeOpenFile(fid));
 data.filenm = filename;
 nl = 0;
 
@@ -258,9 +262,9 @@ switch type
         if nci == nc
             % read all channels
             if dtype == 'S'
-                [data.kd_dat count] = fread(fid, inf, [ipldtype,'=>single']);
+                [data.kd_dat, count] = fread(fid, inf, [ipldtype,'=>single']);
             else
-                [data.kd_dat count] = fread(fid, inf, [ipldtype,'=>double']);
+                [data.kd_dat, count] = fread(fid, inf, [ipldtype,'=>double']);
             end
             if mod(count, mcount) % count must be a multiple of mcount (80 bytes)
                 warning('IPL:sequentialEOF', 'unexpected end of sequential data in file %s', filename)
@@ -281,9 +285,9 @@ switch type
             nm = 0;
             while 1
                 if dtype == 'S'
-                    [tmp count] = fread(fid, nc, [ipldtype,'=>single']);
+                    [tmp, count] = fread(fid, nc, [ipldtype,'=>single']);
                 else
-                    [tmp count] = fread(fid, nc, [ipldtype,'=>double']);
+                    [tmp, count] = fread(fid, nc, [ipldtype,'=>double']);
                 end
 
                 if count ~= nc, break, end
@@ -291,12 +295,13 @@ switch type
 
                 % preallocate records in data.kd_dat
                 if nr > nm
-                    if dtype == 'S'
-                        data.kd_dat(nr:nm,1:nci) = single(NaN);
-                    else
-                        data.kd_dat(nr:nm,1:nci) = double(NaN);
-                    end
+                    nm0 = nm;
                     nm = nm + nmp;
+                    if dtype == 'S'
+                        data.kd_dat(nm0+1:nm, 1:nci) = single(NaN);
+                    else
+                        data.kd_dat(nm0+1:nm, 1:nci) = double(NaN);
+                    end
                 end
 
                 data.kd_dat(nr,:) = tmp(index);
@@ -340,11 +345,12 @@ switch type
             if ~ischar(hc), break, end
             nr = nr + 1;
             if nr > nm % preallocate records in data.kd_dat
+                nm0 = nm;
                 nm = nm + nmp;
                 if dtype == 'S'
-                    data.kd_dat(nr:nm,1:nci) = single(NaN);
+                    data.kd_dat(nm0+1:nm, 1:nci) = single(NaN);
                 else
-                    data.kd_dat(nr:nm,1:nci) = double(NaN);
+                    data.kd_dat(nm0+1:nm, 1:nci) = double(NaN);
                 end
             end
             for ic = 1:nci
@@ -352,11 +358,11 @@ switch type
                     warning('IPL:whiteSpace', 'unexpected whitespace in file %s line %d', filename, nl)
                 end
                 hd = sscanf(cc{index(ic)}, '%f');
-                if length(hd) == 1 % take result if one valid number was read
+                if isscalar(hd) % take result if one valid number was read
                     if dtype == 'S'
-                        data.kd_dat(nr,index(ic)) = single(hd);
+                        data.kd_dat(nr, ic) = single(hd);
                     else
-                        data.kd_dat(nr,index(ic)) = double(hd);
+                        data.kd_dat(nr, ic) = double(hd);
                     end
                 end
             end
@@ -381,5 +387,11 @@ if isempty(tmp)
     out = strtrim(in);
 else
     out = [strtrim(in(1:tmp(1)-1)),',',strtrim(in(tmp(1)+1:end))];
+end
+end
+
+function closeOpenFile(fid)
+if fid > 0 && any(openedFiles() == fid)
+    fclose(fid);
 end
 end

@@ -86,14 +86,8 @@ if isfield(data.head, 'vinc')
 else
     iv = max(v, vmin);
     iv = min(iv, vmax);
-    for i = 1:length(iv)
-        idx = max(find(data.v <= iv(i), 1, 'last'), 1);
-        if isempty(idx)
-            iv(i) = 1;
-        else
-            iv(i) = idx;
-        end
-    end
+    iv = discretize(iv, [-inf reshape(data.v(2:end), 1, []) inf]);
+    iv(isnan(iv)) = 1;
 end
 
 end %function crg_eval_uv2iuiv
