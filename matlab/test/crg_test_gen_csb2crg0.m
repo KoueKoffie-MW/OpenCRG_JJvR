@@ -147,7 +147,7 @@ b = { ...
 
 dat1 = crg_gen_csb2crg0([1,0.5], ulength, 1, [], [], b);
 
-crg_show_road_uv2surface(dat1, [120:1:180], [-1:0.2:1]);
+crg_show_road_uv2surface(dat1, 120:1:180, -1:0.2:1);
 
 %% Test2.3 ( curvature, slope and banking )
 

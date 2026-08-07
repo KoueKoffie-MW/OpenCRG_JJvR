@@ -41,7 +41,7 @@ sdf_out{1} = '';
 
 state = 0;
 
-hc = upper(strcat('$', blockname));
+hc = strcat('$', blockname);
 
 for i = 1:length(sdf_in)
     switch state

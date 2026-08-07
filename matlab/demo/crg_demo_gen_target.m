@@ -81,7 +81,7 @@ end
 
 %% separate slope and banking
 
-crg = crg_separate_sb(crg, swlen, bwlen)
+crg = crg_separate_sb(crg, swlen, bwlen);
 
 %% write surface CRG data set
 

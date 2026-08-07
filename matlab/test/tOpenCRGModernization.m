@@ -118,6 +118,18 @@ classdef tOpenCRGModernization < matlab.unittest.TestCase
             testCase.verifyTrue(all(isfinite(imag(values)), "all"));
         end
 
+        function pxy2PpxyHandlesSparseNullSpaceBranch(testCase)
+            x = linspace(0, 4, 2001).';
+            pxy = [x sin(x)];
+
+            ppxy = crg_gen_pxy2ppxy(pxy, struct("sf_incr", 0.05, "ss_spar", 0.99));
+            values = ppval(ppxy, linspace(ppxy.breaks(1), ppxy.breaks(end), 100));
+
+            testCase.verifyGreaterThan(ppxy.pieces, 60);
+            testCase.verifyTrue(all(isfinite(real(values)), "all"));
+            testCase.verifyTrue(all(isfinite(imag(values)), "all"));
+        end
+
         function showIsequalCreatesHistogramGraphic(testCase)
             data = crg_read(fullfile(testCase.CrgTextFolder, "handmade_curved.crg"));
             [~, differenceData] = crg_isequal(data, data);

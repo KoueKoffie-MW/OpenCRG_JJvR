@@ -57,7 +57,7 @@ mpro.proj.nm='UTM_32U'; % local datum
 llh = [pi/180*org_llh(1), pi/180*org_llh(2), org_llh(3)];
 
 % transform WGS84 llh radian -> UTM_32U
-enh_utm = map_geod2pmap_tm(llh, mpro.gell, mpro.proj)
+enh_utm = map_geod2pmap_tm(llh, mpro.gell, mpro.proj);
 
 % transform UTM_32U -> WGS84 llh radian
 llh = map_pmap2geod_tm(enh_utm,  mpro.gell, mpro.proj);
@@ -87,7 +87,7 @@ llh = [pi/180*org_llh(1), pi/180*org_llh(2), org_llh(3)];
 
 % transform WGS84 llh radian -> GK3 zone 4 (BESSELDHDN)
 % transformation includes datum transformation, see map_global2plocal.m
-enh_gk = map_global2plocal(llh, mpro2)
+enh_gk = map_global2plocal(llh, mpro2);
 
 % transform GK3 zone 4 (BESSELDHDN) -> WGS84 llh radian
 % transformation includes datum transformation, see map_global2plocal.m
@@ -104,4 +104,4 @@ fprintf('%% Test3 (GK to UTM)')
 llh = map_plocal2global(enh_gk, mpro2);
 
 % transform WGS84 llh radian -> UTM_32U
-enh_utm = map_geod2pmap_tm(llh, mpro.gell, mpro.proj)
+enh_utm = map_geod2pmap_tm(llh, mpro.gell, mpro.proj);

@@ -43,10 +43,12 @@ u = data.head.ubeg:data.head.uinc:data.head.uend;
 
 [iu] = crg_eval_uv2iuiv(data, [-1, 0, 5, 7, 10, 11] );
 disp('Index: ');
-disp(sprintf('< %d > \t', iu));
+fprintf('< %d > \t', iu);
+fprintf('\n');
 
 disp('Distance u(iu) = ');
-disp(sprintf('< %f > \t', u(iu)));
+fprintf('< %f > \t', u(iu));
+fprintf('\n');
 
 %% Test2 ( empty )
 
@@ -61,10 +63,12 @@ v = data.head.vmin:data.head.vinc:data.head.vmax;
 
 [~, iv] = crg_eval_uv2iuiv(data, [],  [-2 -1 -0.5, 0, 0.5, 1 2]);
 disp('Index: ');
-disp(sprintf('< %d > \t', iv));
+fprintf('< %d > \t', iv);
+fprintf('\n');
 
 disp('Distance v(iv) = ');
-disp(sprintf('< %f > \t', v(iv)));
+fprintf('< %f > \t', v(iv));
+fprintf('\n');
 
 
 %% Test3.1 ( v-values no constant vinc )
@@ -74,10 +78,12 @@ v = data.v;
 
 [~, iv] = crg_eval_uv2iuiv(data, [],  [-2 -1 -0.5, 0, 0.5, 1 2]);
 disp('Index: ');
-disp(sprintf('< %d > \t', iv));
+fprintf('< %d > \t', iv);
+fprintf('\n');
 
 disp('Distance v(iv) = ');
-disp(sprintf('< %f > \t', v(iv)));
+fprintf('< %f > \t', v(iv));
+fprintf('\n');
 
 
 %% Test4 ( uv-values & different uinc );
@@ -86,15 +92,19 @@ data = crg_read('demo6.crg');
 u = data.head.ubeg:data.head.uinc:data.head.uend;
 v = data.v;
 
-dat = crg_rerender(data, [0.2]);
+dat = crg_rerender(data, 0.2);
 
 [iu, iv] = crg_eval_uv2iuiv(dat, [-1, 0, 5, 7, 10, 11], [-2, -1, 0.5, 0, 0.5, 1, 2]);
 disp('Index iu: ');
-disp(sprintf('< %d > \t', iu));
+fprintf('< %d > \t', iu);
+fprintf('\n');
 disp('Index iv: ');
-disp(sprintf('< %d > \t', iv));
+fprintf('< %d > \t', iv);
+fprintf('\n');
 
 disp('Distance u(iu) = ');
-disp(sprintf('< %f > \t', u(iu)));
+fprintf('< %f > \t', u(iu));
+fprintf('\n');
 disp('Distance v(iv) = ');
-disp(sprintf('< %f > \t', v(iv)));
+fprintf('< %f > \t', v(iv));
+fprintf('\n');

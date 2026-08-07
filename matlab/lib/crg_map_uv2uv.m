@@ -123,7 +123,7 @@ if isfield(crg_uv.head, 'vinc')
 else
     if isfield(data.head, 'vinc')
         tvinc = data.head.vinc;
-    elseif abs(data.v - crg_uv.v) > max(ceps*(data.v + data.v), ctol);
+    elseif abs(data.v - crg_uv.v) > max(ceps*(data.v + data.v), ctol)
             tvinc = data.v;
     end
 end

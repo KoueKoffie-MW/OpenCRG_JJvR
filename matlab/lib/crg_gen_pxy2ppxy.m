@@ -304,7 +304,10 @@ else
     kmin = [1:4, 5:2:nu-1];
     kmax = [2:2:nu-4, nu-3:nu];
     % Allocate space for Z
-    Z = spalloc(nu, nr, 6*nr);
+    zRows = zeros(6*nr, 1);
+    zCols = zeros(6*nr, 1);
+    zVals = zeros(6*nr, 1);
+    zCount = 0;
     % Loop over null vectors
     for j = 1:nr
         k0 = k;
@@ -315,8 +318,14 @@ else
             Bj = B(imin(j):imax(j),kmin(j):kmax(j));    % k by k+1
             z = [-Bj(:,1:k)\Bj(:,k+1); 1];
         end
-        Z(kmin(j):kmax(j),j) = z;
+        rows = (kmin(j):kmax(j)).';
+        indices = zCount + (1:numel(rows));
+        zRows(indices) = rows;
+        zCols(indices) = j;
+        zVals(indices) = z(:);
+        zCount = zCount + numel(rows);
     end
+    Z = sparse(zRows(1:zCount), zCols(1:zCount), zVals(1:zCount), nu, nr);
 end
 
 % Solve: Minimum norm(A*u - y) subject to B*u = 0
