@@ -120,7 +120,7 @@ if isfield(data, 'opts')
         % all unknown keywords and many syntax flaws will be silently ignored
         [oname, ovalue, ok] = parseNameNumber(hc);
         if ~ok, continue, end
-        switch lower(char(oname))
+        switch lower(oname)
 %         OpenCRG border modes in u and v directions
             case 'border_mode_u'
                 data.opts.bdmu = ovalue;
@@ -191,7 +191,7 @@ if isfield(data, 'mods')
         % all unknown keywords and many syntax flaws will be silently ignored
         [mname, mvalue, ok] = parseNameNumber(hc);
         if ~ok, continue, end
-        switch lower(char(mname))
+        switch lower(mname)
 %         OpenCRG scaling
             case 'scale_z_grid'
                 data.mods.szgd = mvalue;
@@ -263,7 +263,7 @@ for i = 1:length(block)
     % all unknown keywords and many syntax flaws will be silently ignored
     [hname, hvalue, ok] = parseNameNumber(hc);
     if ~ok, continue, end
-    switch lower(char(hname))
+    switch lower(hname)
         case 'reference_line_start_u'
             data.head.ubeg = hvalue;
         case 'reference_line_end_u'
@@ -347,7 +347,7 @@ if ~isempty(block)
         % all unknown keywords and many syntax flaws will be silently ignored
         [pname, pvalue, ok] = parseNameText(hc);
         if ~ok, continue, end
-        switch lower(char(pname))
+        switch lower(pname)
             case 'gell_nm'
                 data.mpro.gell.nm = parseQuotedName(pvalue);
             case 'gell_a'
@@ -570,18 +570,18 @@ function [name, valueText, ok] = parseNameText(line)
 separator = strfind(line, '=');
 ok = ~isempty(separator);
 if ~ok
-    name = "";
-    valueText = "";
+    name = '';
+    valueText = '';
     return
 end
 
-name = strtrim(string(line(1:separator(1)-1)));
-valueText = strtrim(string(line(separator(1)+1:end)));
-ok = name ~= "" && valueText ~= "";
+name = strtrim(line(1:separator(1)-1));
+valueText = strtrim(line(separator(1)+1:end));
+ok = ~isempty(name) && ~isempty(valueText);
 end
 
 function value = parseQuotedName(text)
-value = regexp(char(text), '(?<=\'')\w+', 'match', 'once');
+value = regexp(text, '(?<=\'')\w+', 'match', 'once');
 end
 
 function fields = parseCsvFields(line, fieldCount)
