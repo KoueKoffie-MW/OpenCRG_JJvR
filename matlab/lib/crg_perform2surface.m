@@ -64,11 +64,6 @@ else
     v = data.v;
 end
 
-vmin = v(1);
-vmax = v(end);
-
-[nu nv] = size(data.z);
-
 %% check of mismatch between data.v and data of uv_surf
 
 posmode = {'Ignore' 'Profile' 'Random'};
@@ -95,7 +90,7 @@ end
 
 %% now perform profile(s) and random surfaces if present
 
-[vn vm] = size(uv_surf);
+[vn, ~] = size(uv_surf);
 for ii = 1:vn
     switch char(posmode(strmatch(lower(strtrim(uv_surf{ii,1}{1,1})),lower(posmode))))
         case 'Ignore'
