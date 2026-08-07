@@ -45,7 +45,7 @@ function [ pindex, pij] = crg_peakfinder( data, iu, iv, th, ra )
 
 %% default
 
-[nu nv] = size(data.z);
+[nu, nv] = size(data.z);
 
 if nargin < 5 || isempty(ra), ra = 3; end
 if nargin < 4 || isempty(th), th = 0.5; end

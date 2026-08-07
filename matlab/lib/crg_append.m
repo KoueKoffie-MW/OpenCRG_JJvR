@@ -71,8 +71,8 @@ ceps1 = data1.opts.ceps;
 
 %% CRG sizes
 
-[nu1 nv1 ]= size(data1.z);
-[nu2 nv2 ]= size(data2.z);
+[nu1, nv1]= size(data1.z);
+[nu2, nv2]= size(data2.z);
 
 nu = nu1 + nu2 - 2;
 

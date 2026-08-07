@@ -57,7 +57,7 @@ function [data] = crg_filter(data, iu, iv, fm, mask, wopt)
 % *****************************************************************
 
 %% default
-[nu nv] = size(data.z);
+[nu, nv] = size(data.z);
 
 if nargin < 6, wopt = [1 1]; end
 if nargin < 5 || isempty(mask), mask = [3 3]; end

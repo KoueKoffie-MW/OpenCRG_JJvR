@@ -553,10 +553,10 @@ end
 
 %% find current reference point position and orientation
 
-[pxy data] = crg_eval_uv2xy(data, [rptu rptv]);
-[pz  data] = crg_eval_uv2z (data, [rptu rptv]);
+[pxy, data] = crg_eval_uv2xy(data, [rptu rptv]);
+[pz,  data] = crg_eval_uv2z (data, [rptu rptv]);
 
-[phi data] = crg_eval_u2phi(data, rptu);
+[phi, data] = crg_eval_u2phi(data, rptu);
 
 %% calculate offsets needed to move reference point to target position
 

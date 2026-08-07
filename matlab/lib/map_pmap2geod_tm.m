@@ -1,4 +1,4 @@
-function [llh ell pro] = map_pmap2geod_tm(enh, ell, pro)
+function [llh, ell, pro] = map_pmap2geod_tm(enh, ell, pro)
 % MAP_PMAP2GEOD_TM Backward projection: transverse mercator.
 %   [LLH ELL PRO] = MAP_PMAP2GEOD_TM(ENH, ELL, PRO) converts points from
 %   map coordinates to geodetic coordinates using backward transverse mercator

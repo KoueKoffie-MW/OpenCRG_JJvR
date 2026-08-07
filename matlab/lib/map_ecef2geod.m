@@ -1,4 +1,4 @@
-function [llh ell] = map_ecef2geod(xyz, ell)
+function [llh, ell] = map_ecef2geod(xyz, ell)
 % MAP_ECEF2GEOD Convert points from ECEF system to geodetic system.
 %   [LLH ELL] = MAP_ECEF2GEOD(XYZ, ELL) converts points from a ECEF system to a geodetic
 %   system.

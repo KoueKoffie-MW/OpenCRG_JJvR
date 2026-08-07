@@ -316,7 +316,7 @@ function [out] = crg_int_eval_poly(upc)
 %
 %   See also CRG_INTRO
 
-[n m] = size(upc);
+[n, m] = size(upc);
 if ~iscell(upc) || n < 1 || ~isequal(m, 2)
     error('CRG:checkError', 'upc must be a cell at least of size == (1,1)')
 end
@@ -349,7 +349,7 @@ function [out] = crg_eval_poly(upc)
 %
 %   See also CRG_INTRO
 
-[n m] = size(upc);
+[n, m] = size(upc);
 if ~iscell(upc) || n < 1 || ~isequal(m, 2)
     error('CRG:checkError', 'upc must be a cell at least of size == (1,1)')
 end

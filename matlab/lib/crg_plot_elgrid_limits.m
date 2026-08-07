@@ -53,7 +53,7 @@ end
 
 %% evaluate DATA.z size
 
-[nu nv] = size(data.z);
+[nu, nv] = size(data.z);
 
 %% check and complement optional arguments
 

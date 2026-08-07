@@ -72,7 +72,7 @@ ppxy = crg_gen_pxy2ppxy(pxy, opts);
 
 %% build the new refline
 
-[crgrefl err] = crg_gen_ppxy2phi(ppxy, uinc);
+[crgrefl, err] = crg_gen_ppxy2phi(ppxy, uinc);
 
 if err > 1e-7
     error('CRG:demoError', 'refline forward integration error %d too big!', err)

@@ -70,7 +70,7 @@ puv(:,2) = [0*u+v(1)   v        0*u+v(end)      v     ]';
 % puv(3,:) = [max(u) max(v)];
 % puv(4,:) = [min(u) max(v)];
 % puv(5,:) = puv(1,:);
-[pxy data] = crg_eval_uv2xy(data, puv);
+[pxy, data] = crg_eval_uv2xy(data, puv);
 hold on
 plot(pxy(:,1), pxy(:,2))
 

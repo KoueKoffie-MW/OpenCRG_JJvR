@@ -67,7 +67,7 @@ end
 
 %% evaluate DATA.z size
 
-[nu nv] = size(data.z);
+[nu, nv] = size(data.z);
 
 if nu < 2 || nv < 2
     error('CRG:checkError', 'size of DATA.z too small')

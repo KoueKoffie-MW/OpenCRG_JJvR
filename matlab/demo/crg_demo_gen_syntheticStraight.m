@@ -43,7 +43,7 @@ data = crg_gen_csb2crg0(inc, u, v);
 
 %% add z-values
 
-[nu nv] = size(data.z);
+[nu, nv] = size(data.z);
 
 z = 0.01*peaks(nv);
 z = repmat(z, ceil(nu/nv), 1);

@@ -44,7 +44,7 @@ function [ data ] = crg_map_uv2uv( data, crg_uv, iu, iv )
 
 %% default
 
-[nu nv] = size(data.z);
+[nu, nv] = size(data.z);
 
 if nargin < 4 || isempty(iv), iv = [1 nv];         end
 if nargin < 3 || isempty(iu), iu = [1 nu];         end

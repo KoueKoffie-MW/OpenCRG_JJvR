@@ -91,10 +91,10 @@ npol = min(mpol, ceil((data.head.uend-data.head.ubeg)/minc));
 puv = zeros(npol, 2);
 puv(:, 1) = linspace(data.head.ubeg, data.head.uend, npol);
 
-[pxy data] = crg_eval_uv2xy(data, puv);
-[wgs data] = crg_wgs84_xy2wgs(data, pxy);
+[pxy, data] = crg_eval_uv2xy(data, puv);
+[wgs, data] = crg_wgs84_xy2wgs(data, pxy);
 
-[pz data] = crg_eval_uv2z(data, puv([1 end],:));
+[pz, data] = crg_eval_uv2z(data, puv([1 end],:));
 
 %% generate map opts struct
 

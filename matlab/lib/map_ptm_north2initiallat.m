@@ -1,4 +1,4 @@
-function [phi ell pro] = map_ptm_north2initiallat(north, ell, pro)
+function [phi, ell, pro] = map_ptm_north2initiallat(north, ell, pro)
 % MAP_PTM_NORTH2INITIALLAT Transverse mercator utility function.
 %   [PHI ELL PRO] = MAP_PTM_NORTH2INITIALLAT(PHI, ELL, PRO) computes the
 %   initial latitude values needed for the transverse mercator projections.

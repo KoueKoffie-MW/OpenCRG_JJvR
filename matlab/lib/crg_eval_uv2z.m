@@ -86,7 +86,7 @@ sbeg = data.head.sbeg;
 bbeg = data.head.bbeg;
 
 z = data.z;
-[nu nv] = size(z);
+[nu, nv] = size(z);
 nvm1 = nv - 1;
 
 if isfield(data, 'rz')

@@ -76,7 +76,7 @@ else
     rc = zeros(1, nuiu);
 end
 
-[ustairs cstairs] = stairs(u, rc);
+[ustairs, cstairs] = stairs(u, rc);
 
 cmean = mean(rc);
 cstd  = std (rc);

@@ -54,7 +54,7 @@ crg = crg_read('surface.crg');
 
 il = crg.il;
 ir = crg.ir;
-[nu nv] = size(crg.z);
+[nu, nv] = size(crg.z);
 
 %% cut NaN areas
 
@@ -73,7 +73,7 @@ fprintf(1, 'surface.crg elevation grid size = (1:%d, 1:%d)\n', nu, nv);
 if jr>1 || jl<nv || jb>1 || je<nu
     fprintf(1, 'borders with NaNs will be removed, elevation grid cut size = (%d:%d, %d:%d)\n', jb, je, kr, kl);
     crg = crg_cut_iuiv(crg, [jb je], [jr jl]);
-    [nu nv] = size(crg.z);
+    [nu, nv] = size(crg.z);
     fprintf(1, 'target.crg  elevation grid size = (1:%d, 1:%d)\n', nu, nv);
 else
     fprintf(1, 'no borders with NaNs are removed.\n');

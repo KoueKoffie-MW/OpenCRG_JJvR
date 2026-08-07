@@ -1,4 +1,4 @@
-function [xyzb tran] = map_ecef2ecef(xyza, tran, fwbw)
+function [xyzb, tran] = map_ecef2ecef(xyza, tran, fwbw)
 % MAP_ECEF2ECEF Datum transformation in ECEF system.
 %   XYZB = MAP_ECEF2ECEF(XYZA, TRAN, FWBW) transforms points from one ECEF datum
 %   to another.

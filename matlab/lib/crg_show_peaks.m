@@ -48,7 +48,7 @@ function [data] = crg_show_peaks(data, pindex, su, sv, iu, iv)
 % *****************************************************************
 
 %% first check, fix and complement DATA
-[nu nv] = size(data.z);
+[nu, nv] = size(data.z);
 
 if nargin < 6 || isempty(iv),   iv =  [1 nv]; end
 if nargin < 5 || isempty(iu),   iu =  [1 nu]; end

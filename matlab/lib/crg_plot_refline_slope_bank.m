@@ -84,7 +84,7 @@ end
 
 %% plot reference line slope and banking
 
-[us sl] = stairs(u, sl);
+[us, sl] = stairs(u, sl);
 
 plot(us, 100*sl, '-', u, 100*bk, '-')
 
