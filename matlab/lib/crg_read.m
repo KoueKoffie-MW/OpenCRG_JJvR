@@ -414,10 +414,10 @@ if isfield(data.head, 'ubeg'), ubeg = data.head.ubeg; end
 for i=1:length(ipl.kd_ind)
     hc = ipl.kd_ind{i};
     fields = parseCsvFields(hc, 4);
-    ht = char(fields(1));
-    hunit = char(fields(2));
-    hb = str2double(fields(3));
-    hi = str2double(fields(4));
+    ht = fields{1};
+    hunit = fields{2};
+    hb = str2double(fields{3});
+    hi = str2double(fields{4});
     if strcmp(ht, 'reference line u')
         if strcmp(hunit, 'm')
             if ~isnan(hb), ubeg = hb; end
@@ -447,8 +447,8 @@ ichanv = [];
 for i=1:length(ipl.kd_def)
     hc = ipl.kd_def{i};
     fields = parseCsvFields(hc, 2);
-    ht = char(fields(1));
-    hunit = char(fields(2));
+    ht = fields{1};
+    hunit = fields{2};
     if strcmp(ht, 'reference line phi')
         if strcmp(hunit, 'rad')
             ichanp = i;
@@ -585,9 +585,23 @@ value = regexp(char(text), '(?<=\'')\w+', 'match', 'once');
 end
 
 function fields = parseCsvFields(line, fieldCount)
-fields = split(string(line), ",");
-if numel(fields) < fieldCount
-    fields(numel(fields)+1:fieldCount) = "";
+fields = cell(1, fieldCount);
+startIndex = 1;
+for fieldIndex = 1:fieldCount
+    if fieldIndex < fieldCount
+        commaIndex = find(line(startIndex:end) == ',', 1);
+        if isempty(commaIndex)
+            fields{fieldIndex} = strtrim(line(startIndex:end));
+            startIndex = numel(line) + 1;
+        else
+            stopIndex = startIndex + commaIndex - 2;
+            fields{fieldIndex} = strtrim(line(startIndex:stopIndex));
+            startIndex = stopIndex + 2;
+        end
+    elseif startIndex <= numel(line)
+        fields{fieldIndex} = strtrim(line(startIndex:end));
+    else
+        fields{fieldIndex} = '';
+    end
 end
-fields = strtrim(fields(1:fieldCount));
 end
