@@ -92,7 +92,7 @@ if nargin < 5, s = {}; end
 if nargin < 6, b = {}; end
 
 if isempty(inc)     , inc = [0.01 0.01]; end    % default increment
-if length(inc) == 1 , inc = [inc  0.01]; end    % default v-increment
+if isscalar(inc)    , inc = [inc  0.01]; end    % default v-increment
 
 if length(u) < 1 || length(u) > 2
     error('CRG:checkError', 'check of u-spacing was not successful')

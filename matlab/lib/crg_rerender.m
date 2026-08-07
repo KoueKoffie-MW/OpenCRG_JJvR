@@ -106,7 +106,7 @@ data.opts.bdmu = crg.opts.bdmu;
 data.u = [u(1) u(end)];
 
 if isfield(crg, 'p')
-    if length(crg.p) == 1   % constant curvature
+    if isscalar(crg.p)   % constant curvature
         data.p = crg.p;
     else                    % variable curvature
         ppx = spline(du,crg.rx);
@@ -179,7 +179,7 @@ clear XI YI;
 data.z = single(z');
 
 if exist('ts', 'var')     % slope
-    if length(ts) == 1, ts = zeros(1,size(data.z,1)-1)+ts; end
+if isscalar(ts), ts = zeros(1,size(data.z,1)-1)+ts; end
     data.s = interp1(1:length(ts),ts,linspace(1,length(ts),size(data.z,1)-1));
     data.head.sbeg = data.s(1);
     data.head.send = data.s(end);
@@ -191,7 +191,7 @@ if exist('ts', 'var')     % slope
 end
 
 if exist('tb', 'var')     % banking
-    if length(tb) == 1, tb = zeros(1,size(data.z,1))+tb; end
+if isscalar(tb), tb = zeros(1,size(data.z,1))+tb; end
     data.b = interp1(1:length(tb),tb,linspace(1,length(tb),size(data.z,1)));
     data.head.bbeg = data.b(1);
     data.head.bend = data.b(end);

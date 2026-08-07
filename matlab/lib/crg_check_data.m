@@ -661,7 +661,7 @@ if isfield(data, 's') && length(data.s)==nu-1 % variable slope
         if isfield(data.head, 'zbeg')
             data.rz(1) = data.head.zbeg;
         end
-        if length(data.s) == 1
+        if isscalar(data.s)
             for i = 1:1:(nu-1) % forward
                 data.rz(i+1) = data.rz(i) + data.head.uinc*double(data.s);
             end

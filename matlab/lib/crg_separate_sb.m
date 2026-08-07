@@ -84,7 +84,7 @@ end
 %% get old banking
 
 if isfield(data, 'b')
-    if length(data.b) == 1
+    if isscalar(data.b)
         bold = data.head.bbeg*ones(1, nu);
     else
         bold = double(data.b);

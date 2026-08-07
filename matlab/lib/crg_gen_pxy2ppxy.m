@@ -200,7 +200,7 @@ if any(diff(x) < 0)
 end
 
 % Treat breaks
-if numel(arg3) == 1
+if isscalar(arg3)
     if ~isreal(arg3) || mod(arg3,1) || arg3 < 1
         msgid = 'SPLINEFIT:BreakCount';
         message = 'Third argument must be a vector or a positive integer!';
@@ -217,7 +217,7 @@ if any(diff(xb) <= 0)
 end
 
 % Ensure at least two breaks
-if length(xb) < 2
+if numel(xb) < 2
     xb = [x(1); x(mx)];
     if xb(1) == xb(2)
         xb(2) = xb(1) + 1;

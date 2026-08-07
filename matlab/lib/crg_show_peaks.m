@@ -55,10 +55,10 @@ if nargin < 5 || isempty(iu),   iu =  [1 nu]; end
 if nargin < 4 || isempty(sv),   sv =  iv; end
 if nargin < 3 || isempty(su),   su =  iu; end
 
-if length(sv) == 1, sv = [1 sv]; end
-if length(su) == 1, su = [1 su]; end
-if length(iv) == 1, iv = [1 iv]; end
-if length(iu) == 1, iu = [1 iu]; end
+if isscalar(sv), sv = [1 sv]; end
+if isscalar(su), su = [1 su]; end
+if isscalar(iv), iv = [1 iv]; end
+if isscalar(iu), iu = [1 iu]; end
 
 if su > iu
     error('CRG:showError', 'index iu less than visualized area of peaks uv');

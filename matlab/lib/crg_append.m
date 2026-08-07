@@ -95,7 +95,7 @@ end
 if abs(data1.head.send - data2.head.sbeg) > ceps1
     sdel = data1.head.send - data2.head.sbeg;
 
-    if ~isfield(data2, 's') || length(data2.s)==1
+    if ~isfield(data2, 's') || isscalar(data2.s)
         data2.s = zeros(1, nu2-1, 'single');
         data2.s = data2.s + data2.head.sbeg;
     end
@@ -214,7 +214,7 @@ if isfield(data1, 'b') || isfield(data2, 'b') % at least one CRG with banking
 
     % drop last banking of first CRG and first banking of second CRG
     if isfield(data2, 'b')
-        if length(data2.b) == 1
+        if isscalar(data2.b)
             data.b(nu1:end) = data2.b;
         else
             data.b(nu1:end) = data2.b(2:end);

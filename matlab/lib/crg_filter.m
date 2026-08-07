@@ -65,10 +65,10 @@ if nargin < 4 || isempty(fm), fm = 'mean'; end
 if nargin < 3 || isempty(iv), iv = [1 nv]; end
 if nargin < 2 || isempty(iu), iu = [1 nu]; end
 
-if length(wopt) == 1, wopt = [wopt 1]; end
-if length(mask) == 1, mask = [mask mask]; end
-if length(iv) == 1, iv = [1 iv]; end
-if length(iu) == 1, iu = [1 iu]; end
+if isscalar(wopt), wopt = [wopt 1]; end
+if isscalar(mask), mask = [mask mask]; end
+if isscalar(iv), iv = [1 iv]; end
+if isscalar(iu), iu = [1 iu]; end
 
 
 %% check if already successfully checked
