@@ -1,5 +1,9 @@
-%% Demo file generation CRG_DEMO
-% Building a set of demo files with different specifications.
+function crg_demo(options)
+%CRG_DEMO Generate OpenCRG demo files.
+%   CRG_DEMO generates a set of demo files with different specifications.
+%
+%   CRG_DEMO(Show=true) also displays each generated demo file.
+%
 % Do not alter this CRG-file. If necessary, add new demo files. Several test
 % proceedings require these data-structures.
 % The file comments are optimized for the matlab publishing macro.
@@ -35,12 +39,11 @@
 % * show results
 %
 
-% DEFAULT SETTINGS
-% clear environment
-clearvars;
+arguments
+    options.Show (1, 1) logical = false
+end
+
 close all
-% display results
-dispRes = 0;
 
 % build minimal OpenCRG struct
 uinc = 0.01;
@@ -62,8 +65,7 @@ data.z = z;
 data.ct{1} = 'CRG defined by z matrix';
 crg_write(crg_single(data), 'demo1.crg');
 
-dat = crg_read('demo1.crg');
-if dispRes, crg_show(dat); end
+showDemoIfRequested('demo1.crg', options.Show)
 
 %% Demo2: ... and evenly spaced v vector
 
@@ -71,8 +73,7 @@ data.v = v;
 data.ct{2} = '... and evenly spaced v vector';
 crg_write(crg_single(data), 'demo2.crg');
 
-dat = crg_read('demo2.crg');
-if dispRes, crg_show(dat); end
+showDemoIfRequested('demo2.crg', options.Show)
 
 
 %% Demo3: ... and unevenly spaced v vector
@@ -81,8 +82,7 @@ data.v(1) = single(-0.992);
 data.ct{2} = '... and unevenly spaced v vector';
 crg_write(crg_single(data), 'demo3.crg');
 
-dat = crg_read('demo3.crg');
-if dispRes, crg_show(dat); end
+showDemoIfRequested('demo3.crg', options.Show)
 
 %% Demo4: ... generate diagonal reference line by one p value
 
@@ -90,8 +90,7 @@ data.p(1) = pi/4;
 data.ct{3} = '... with diagonal reference line by one p value';
 crg_write(crg_single(data), 'demo4.crg');
 
-dat = crg_read('demo4.crg');
-if dispRes, crg_show(dat); end
+showDemoIfRequested('demo4.crg', options.Show)
 
 %% Demo5: ... generate diagonal reference line by nu-1 p values
 
@@ -100,8 +99,7 @@ data.p(1:np) = pi/4;
 data.ct{3} = '... with diagonal reference line by nu-1 p values';
 crg_write(crg_single(data), 'demo5.crg');
 
-dat = crg_read('demo5.crg');
-if dispRes, crg_show(dat); end
+showDemoIfRequested('demo5.crg', options.Show)
 
 %% Demo6: ... generate curved reference line
 
@@ -113,19 +111,17 @@ end
 data.ct{3} = '... with curved reference line';
 crg_write(crg_single(data), 'demo6.crg');
 
-dat = crg_read('demo6.crg');
-if dispRes, crg_show(dat); end
+showDemoIfRequested('demo6.crg', options.Show)
 
 %% Demo7: ... generate banking
 
 for i=1:nu
-    data.b(i) = 0.1*sin(i/nu*2*pi);
+data.b(i) = 0.1*sin(i/nu*2*pi);
 end
 data.ct{4} = '... with variable cross slope';
 crg_write(crg_single(data), 'demo7.crg');
 
-dat = crg_read('demo7.crg');
-if dispRes, crg_show(dat); end
+showDemoIfRequested('demo7.crg', options.Show)
 
 %% Demo8: ... generate slope
 
@@ -136,8 +132,7 @@ data.b=0.05; % constant cross slope
 data.ct{4} = '... with variable slope and constant cross slope';
 crg_write(crg_single(data), 'demo8.crg');
 
-dat = crg_read('demo8.crg');
-if dispRes, crg_show(dat); end
+showDemoIfRequested('demo8.crg', options.Show)
 
 %% Demo9: ... slope without banking
 
@@ -146,5 +141,13 @@ data = rmfield(data, 'b');
 data.ct{4} = '... with variable slope';
 crg_write(crg_single(data), 'demo9.crg');
 
-dat = crg_read('demo9.crg');
-if dispRes, crg_show(dat); end
+showDemoIfRequested('demo9.crg', options.Show)
+
+end
+
+function showDemoIfRequested(file, showDemo)
+if showDemo
+    data = crg_read(file);
+    crg_show(data);
+end
+end
