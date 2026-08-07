@@ -198,6 +198,26 @@ classdef tOpenCRGModernization < matlab.unittest.TestCase
             testCase.verifyEqual(angle(exp(1i*inverseDend)), angle(exp(1i*dend)), AbsTol=1e-10);
         end
 
+        function wgsUrlSupportsMultiplePoints(testCase)
+            url = crg_wgs84_wgs2url([51 9; 52 10], struct("label", "Open CRG"));
+
+            testCase.verifyClass(url, "cell");
+            testCase.verifyNumElements(url, 2);
+            testCase.verifyTrue(contains(url{1}, "Open+CRG"));
+        end
+
+        function mapWgs2HtmlHandlesMultipleTracks(testCase)
+            fixture = testCase.applyFixture(matlab.unittest.fixtures.TemporaryFolderFixture());
+            file = fullfile(fixture.Folder, "tracks.html");
+            tracks = {[51 9; 52 10]*pi/180, [48 8; 49 9]*pi/180};
+
+            resultFile = map_wgs2html(tracks, file);
+
+            testCase.verifyEqual(resultFile, file);
+            testCase.verifyTrue(isfile(file));
+            testCase.verifyTrue(contains(fileread(file), "Start 2"));
+        end
+
         function mapLocalGlobalRoundTrip(testCase)
             llh = [deg2rad(48.8566) deg2rad(2.3522) 35; ...
                 deg2rad(51.477811) deg2rad(-0.001475) 45];

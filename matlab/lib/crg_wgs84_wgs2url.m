@@ -61,8 +61,9 @@ np = size(wgs, 1);
 if np == 1
     url = sprintf('http://maps.google.com/maps?q=%.6f,%.6f(%s)', wgs(1,1), wgs(1,2), label);
 else
+    url = cell(1, np);
     for i = 1:np
-        url{i} = sprintf('http://maps.google.com/maps?q=%.6f,%.6f(%s)', wgs(i,1), wgs(i,2), label); %#ok<AGROW>
+        url{i} = sprintf('http://maps.google.com/maps?q=%.6f,%.6f(%s)', wgs(i,1), wgs(i,2), label);
     end
 end
 

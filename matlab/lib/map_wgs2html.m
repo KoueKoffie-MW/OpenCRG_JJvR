@@ -69,11 +69,12 @@ function [file] = map_wgs2html(llh, file, opts)
 lc = iscell(llh);
 if lc
     nc = length(llh);
+    wgs = cell(1, nc);
     for ic = 1:nc
         if(~isempty(llh{ic}))
-            wgs{ic} = llh{ic}(:,1:2)*180/pi; %#ok<AGROW>
+            wgs{ic} = llh{ic}(:,1:2)*180/pi;
         else
-            wgs{ic} = {}; %#ok<AGROW>
+            wgs{ic} = {};
         end
     end
 else
@@ -131,14 +132,10 @@ if isfield(opts, 'tcolorin')
     if iscell(opts.tcolorin)
         tcolorin = opts.tcolorin;
     else
-        for ic = 1:nc
-            tcolorin{ic} = opts.tcolorin; %#ok<AGROW>
-        end
+        tcolorin = repmat({opts.tcolorin}, 1, nc);
     end
 else
-    for ic = 1:nc
-        tcolorin{ic} = '0099e6'; %#ok<AGROW>
-    end
+    tcolorin = repmat({'0099e6'}, 1, nc);
 end
 
 % OPTS - single value or cell array
@@ -147,58 +144,45 @@ if isfield(opts, 'tcolorout')
     if iscell(opts.tcolorout)
         tcolorout = opts.tcolorout;
     else
-        for ic = 1:nc
-            tcolorout{ic} = opts.tcolorout; %#ok<AGROW>
-        end
+        tcolorout = repmat({opts.tcolorout}, 1, nc);
     end
 else
-    for ic = 1:nc
-        tcolorout{ic} = '006ea5'; %#ok<AGROW>
-    end
+    tcolorout = repmat({'006ea5'}, 1, nc);
 end
 
 if isfield(opts, 'twidthin')
     if iscell(opts.twidthin)
         twidthin = opts.twidthin;
     else
-        for ic = 1:nc
-            twidthin{ic} = opts.twidthin; %#ok<AGROW>
-        end
+        twidthin = repmat({opts.twidthin}, 1, nc);
     end
 else
-    for ic = 1:nc
-        twidthin{ic} = 7; %#ok<AGROW>
-    end
+    twidthin = repmat({7}, 1, nc);
 end
 
 if isfield(opts, 'twidthout')
     if iscell(opts.twidthout)
         twidthout = opts.twidthout;
     else
-        for ic = 1:nc
-            twidthout{ic} = opts.twidthout; %#ok<AGROW>
-        end
+        twidthout = repmat({opts.twidthout}, 1, nc);
     end
 else
-    for ic = 1:nc
-        twidthout{ic} = 10; %#ok<AGROW>
-    end
+    twidthout = repmat({10}, 1, nc);
 end
 
 if isfield(opts, 'beg_nm')
     if iscell(opts.beg_nm)
         beg_nm = opts.beg_nm;
     else
-        for ic = 1:nc
-            beg_nm{ic} = opts.beg_nm; %#ok<AGROW>
-        end
+        beg_nm = repmat({opts.beg_nm}, 1, nc);
     end
 else
+    beg_nm = cell(1, nc);
     for ic = 1:nc
         if lc
-            beg_nm{ic} = sprintf('Start %u', ic);  %#ok<AGROW>
+            beg_nm{ic} = sprintf('Start %u', ic);
         else
-            beg_nm{ic} = 'Start';  %#ok<AGROW>
+            beg_nm{ic} = 'Start';
         end
     end
 end
@@ -207,28 +191,27 @@ if isfield(opts, 'beg_pu')
     if iscell(opts.beg_pu)
         beg_pu = opts.beg_pu;
     else
-        for ic = 1:nc
-            beg_pu{ic} = opts.beg_pu; %#ok<AGROW>
-        end
+        beg_pu = repmat({opts.beg_pu}, 1, nc);
     end
 else
+    beg_pu = cell(1, nc);
     for ic = 1:nc
         if lc
-            beg_pu{ic} = sprintf('<h4>Start of Track %u:</h4>', ic); %#ok<AGROW>
+            beg_pu{ic} = sprintf('<h4>Start of Track %u:</h4>', ic);
         else
-            beg_pu{ic} = '<h4>Start of Track:</h4>'; %#ok<AGROW>
+            beg_pu{ic} = '<h4>Start of Track:</h4>';
         end
 
         if(~isempty(wgs{ic}))
             beg_pu{ic} = [beg_pu{ic} '<table style=\"text-align:right\"><tbody>' ...
                 '<tr><td>lat =</td><td>' num2str(wgs{ic}(1,1),'%.6f') '</td></tr>' ...
-                '<tr><td>lon =</td><td>' num2str(wgs{ic}(1,2),'%.6f') '</td></tr>']; %#ok<AGROW>
+                '<tr><td>lon =</td><td>' num2str(wgs{ic}(1,2),'%.6f') '</td></tr>'];
             if size(wgs{ic}, 2) > 2
-                beg_pu{ic} = [beg_pu{ic} '<tr><td>alt =</td><td>' num2str(wgs{ic}(1,3),'%.6f') '</td></tr>']; %#ok<AGROW>
+                beg_pu{ic} = [beg_pu{ic} '<tr><td>alt =</td><td>' num2str(wgs{ic}(1,3),'%.6f') '</td></tr>'];
             end
-            beg_pu{ic} = [beg_pu{ic} '</tbody></table>']; %#ok<AGROW>
+            beg_pu{ic} = [beg_pu{ic} '</tbody></table>'];
         else
-            beg_pu{ic} = []; %#ok<AGROW>
+            beg_pu{ic} = [];
         end
 
     end
@@ -238,14 +221,10 @@ if isfield(opts, 'course_pu')
     if iscell(opts.course_pu)
         course_pu = opts.course_pu;
     else
-        for ic = 1:nc
-            course_pu{ic} = opts.course_pu; %#ok<AGROW>
-        end
+        course_pu = repmat({opts.course_pu}, 1, nc);
     end
 else
-    for ic = 1:nc
-            course_pu{ic} = 'undefined'; %#ok<AGROW>
-    end
+    course_pu = repmat({'undefined'}, 1, nc);
 end
 
 
@@ -253,16 +232,15 @@ if isfield(opts, 'end_nm')
     if iscell(opts.end_nm)
         end_nm = opts.end_nm;
     else
-        for ic = 1:nc
-            end_nm{ic} = opts.end_nm; %#ok<AGROW>
-        end
+        end_nm = repmat({opts.end_nm}, 1, nc);
     end
 else
+    end_nm = cell(1, nc);
     for ic = 1:nc
         if lc
-            end_nm{ic} = sprintf('End %u', ic);  %#ok<AGROW>
+            end_nm{ic} = sprintf('End %u', ic);
         else
-            end_nm{ic} = 'End';  %#ok<AGROW>
+            end_nm{ic} = 'End';
         end
     end
 end
@@ -271,29 +249,28 @@ if isfield(opts, 'end_pu')
     if iscell(opts.end_pu)
         end_pu = opts.end_pu;
     else
-        for ic = 1:nc
-            end_pu{ic} = opts.end_pu; %#ok<AGROW>
-        end
+        end_pu = repmat({opts.end_pu}, 1, nc);
     end
 else
+    end_pu = cell(1, nc);
     for ic = 1:nc
         if lc
-            end_pu{ic} = sprintf('<h4>End of Track %u:</h4>', ic); %#ok<AGROW>
+            end_pu{ic} = sprintf('<h4>End of Track %u:</h4>', ic);
         else
-            end_pu{ic} = '<h4>End of Track:</h4>'; %#ok<AGROW>
+            end_pu{ic} = '<h4>End of Track:</h4>';
         end
         if(~isempty(wgs{ic}))
             end_pu{ic} = [end_pu{ic} '<table style=\"text-align:right\"><tbody>' ...
                 '<tr><td>lat =</td><td>' num2str(wgs{ic}(end,1),'%.6f') '</td></tr>' ...
-                '<tr><td>lon =</td><td>' num2str(wgs{ic}(end,2),'%.6f') '</td></tr>']; %#ok<AGROW>
+                '<tr><td>lon =</td><td>' num2str(wgs{ic}(end,2),'%.6f') '</td></tr>'];
             if size(wgs{ic}, 2) > 2
-                end_pu{ic} = [end_pu{ic} '<tr><td>alt =</td><td>' num2str(wgs{ic}(1,3),'%.6f') '</td></tr>']; %#ok<AGROW>
+                end_pu{ic} = [end_pu{ic} '<tr><td>alt =</td><td>' num2str(wgs{ic}(1,3),'%.6f') '</td></tr>'];
             end
 
-            end_pu{ic} = [end_pu{ic} '</tbody></table>']; %#ok<AGROW>
+            end_pu{ic} = [end_pu{ic} '</tbody></table>'];
 
        else
-            end_pu{ic} = []; %#ok<AGROW>
+            end_pu{ic} = [];
         end
     end
 end
