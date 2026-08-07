@@ -1,4 +1,4 @@
-function [wgs2 dend] = crg_wgs84_invdist(wgs1, dbeg, dist)
+function [wgs2, dend] = crg_wgs84_invdist(wgs1, dbeg, dist)
 %CRG_WGS84_INVDIST Calculate WGS-84 positions by distance and bearing.
 %   [WGS2 DEND] = CRG_WGS84_INVDIST(WGS1, DBEG, DIST) calculates a WGS-84
 %   position defined by a base position, a distance, and a bearing.
@@ -51,7 +51,7 @@ wgs1 = wgs1 * pi/180;
 dbeg = dbeg';
 dist = dist';
 
-[lat2 lon2 dend] = wgs84invdist(wgs1(:,1),wgs1(:,2), dbeg,dist, 0,0);
+[lat2, lon2, dend] = wgs84invdist(wgs1(:,1),wgs1(:,2), dbeg,dist, 0,0);
 
 wgs2 = [lat2 lon2] * 180/pi;
 dend = dend' - pi;
@@ -119,7 +119,7 @@ function [lat2_out, lon2_out, baz_out] = wgs84invdist(varargin)
   rows = zeros(1,nargin);
   cols = zeros(1,nargin);
 
-  for ii=1:nargin,
+  for ii=1:nargin
     [rows(ii), cols(ii)] = size(varargin{ii});
   end
 
@@ -128,7 +128,7 @@ function [lat2_out, lon2_out, baz_out] = wgs84invdist(varargin)
 % make sure each input has either 1 row or n rows
   inputerr = any(rows ~= 1 & rows ~= maxrows);
 
-  if inputerr,
+  if inputerr
     error('inputs must have either 1 row or n rows')
   end
 
@@ -144,9 +144,9 @@ function [lat2_out, lon2_out, baz_out] = wgs84invdist(varargin)
 %-------------------------------------------------------------------------------
   expand = any(rows == 1) & (maxrows > 1);
 
-  if expand,
-    for ii=1:nargin,
-      if rows(ii) == 1,
+  if expand
+    for ii=1:nargin
+      if rows(ii) == 1
         varargin{ii} = repmat(varargin{ii}, maxrows, 1);
       end
     end
@@ -163,9 +163,9 @@ function [lat2_out, lon2_out, baz_out] = wgs84invdist(varargin)
   deg_in = zeros(maxrows, 1);
   deg_out = zeros(maxrows, 1);
 
-  if nargin >= 5,
+  if nargin >= 5
     deg_in = varargin{5};
-    if nargin == 6,
+    if nargin == 6
       deg_out = varargin{6};
     end
   end
@@ -221,7 +221,7 @@ function [lat2_out, lon2_out, baz_out] = wgs84invdist(varargin)
 
   baz = zeros(size(faz));
 
-  if (cf ~= zero),
+  if (cf ~= zero)
     baz = atan2(tu, cf) * two;
   end
 
@@ -239,7 +239,7 @@ function [lat2_out, lon2_out, baz_out] = wgs84invdist(varargin)
 
   repeat = 1;
 
-  while repeat == 1,
+  while repeat == 1
 
     sy = sin(y);
     cy = cos(y);
@@ -250,7 +250,7 @@ function [lat2_out, lon2_out, baz_out] = wgs84invdist(varargin)
     y = e + e - one;
     y = (((sy .* sy * four - three) .* y .* cz .* d / six + x) .* d / four - cz) .* sy .* d + tu;
 
-    if all(abs(y - c) <= eps),
+    if all(abs(y - c) <= eps)
       break
     end
 
@@ -287,7 +287,7 @@ function [lat2_out, lon2_out, baz_out] = wgs84invdist(varargin)
   lon2_out(deg_out == 1) = lon2_out(deg_out == 1) * rad2deg;
   baz_out(deg_out == 1) = baz_out(deg_out == 1) * rad2deg;
 
-  if nargout == 1,
+  if nargout == 1
     lat2_out = [lat2_out lon2_out baz_out];
   end
 

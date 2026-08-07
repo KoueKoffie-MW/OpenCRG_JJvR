@@ -1,4 +1,4 @@
-function [dist dbeg dend] = crg_wgs84_dist(wgs1, wgs2)
+function [dist, dbeg, dend] = crg_wgs84_dist(wgs1, wgs2)
 %CRG_WGS84_DIST Evaluate distance and bearing between WGS-84 positions.
 %   [DIST DBEG DEND] = CRG_WGS84_DIST(WGS1, WGS2) evaluates distance and
 %   bearing for given WGS-84 positions. Since the earth is approximately a
@@ -49,7 +49,7 @@ function [dist dbeg dend] = crg_wgs84_dist(wgs1, wgs2)
 
 %% call wgs84dist
 
-[dist dbeg dend] = wgs84dist(wgs1(:,1),wgs1(:,2), wgs2(:,1),wgs2(:,2), 1,0);
+[dist, dbeg, dend] = wgs84dist(wgs1(:,1),wgs1(:,2), wgs2(:,1),wgs2(:,2), 1,0);
 
 dist = dist';
 dbeg = dbeg';
@@ -118,7 +118,7 @@ function [s_out, faz_out, baz_out] = wgs84dist(varargin)
   rows = zeros(1,nargin);
   cols = zeros(1,nargin);
 
-  for ii=1:nargin,
+  for ii=1:nargin
     [rows(ii), cols(ii)] = size(varargin{ii});
   end
 
@@ -127,7 +127,7 @@ function [s_out, faz_out, baz_out] = wgs84dist(varargin)
 % make sure each input has either 1 row or n rows
   inputerr = any(rows ~= 1 & rows ~= maxrows);
 
-  if inputerr,
+  if inputerr
     error('inputs must have either 1 row or n rows')
   end
 
@@ -143,9 +143,9 @@ function [s_out, faz_out, baz_out] = wgs84dist(varargin)
 %-------------------------------------------------------------------------------
   expand = any(rows == 1) & (maxrows > 1);
 
-  if expand,
-    for ii=1:nargin,
-      if rows(ii) == 1,
+  if expand
+    for ii=1:nargin
+      if rows(ii) == 1
         varargin{ii} = repmat(varargin{ii}, maxrows, 1);
       end
     end
@@ -162,9 +162,9 @@ function [s_out, faz_out, baz_out] = wgs84dist(varargin)
   deg_in = zeros(maxrows, 1);
   deg_out = zeros(maxrows, 1);
 
-  if nargin >= 5,
+  if nargin >= 5
     deg_in = varargin{5};
-    if nargin == 6,
+    if nargin == 6
       deg_out = varargin{6};
     end
   end
@@ -225,7 +225,7 @@ function [s_out, faz_out, baz_out] = wgs84dist(varargin)
 
   repeat = 1;
 
-  while repeat == 1,
+  while repeat == 1
 
     sx = sin(x);
     cx = cos(x);
@@ -248,7 +248,7 @@ function [s_out, faz_out, baz_out] = wgs84dist(varargin)
     x = ((e .* cy .* c + cz) .* sy .* c + y) .* sa;
     x = (one - c) .* x * f + lon2 - lon1;
 
-    if all(abs(d-x) <= eps0),
+    if all(abs(d-x) <= eps0)
       break
     end
 
@@ -279,7 +279,7 @@ function [s_out, faz_out, baz_out] = wgs84dist(varargin)
   faz_out(deg_out == 1) = faz_out(deg_out == 1) * rad2deg;
   baz_out(deg_out == 1) = baz_out(deg_out == 1) * rad2deg;
 
-  if nargout == 1,
+  if nargout == 1
     s_out = [s_out faz_out baz_out];
   end
 

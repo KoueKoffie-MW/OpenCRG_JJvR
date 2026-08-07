@@ -148,6 +148,20 @@ classdef tOpenCRGModernization < matlab.unittest.TestCase
             testCase.verifyEqual(restored.head.pend, data.head.pend, AbsTol=1e-12);
         end
 
+        function wgs84DirectInverseRoundTrip(testCase)
+            wgs1 = [51.477811 -0.001475; 48.8566 2.3522];
+            wgs2 = [51.477678 0.000000; 48.8584 2.2945];
+
+            [dist, dbeg, dend] = crg_wgs84_dist(wgs1, wgs2);
+            [roundTrip, inverseDend] = crg_wgs84_invdist(wgs1, dbeg, dist);
+
+            testCase.verifySize(dist, [1 2]);
+            testCase.verifyTrue(all(isfinite(dist)));
+            testCase.verifyTrue(all(dist > 0));
+            testCase.verifyEqual(roundTrip, wgs2, AbsTol=1e-7);
+            testCase.verifyEqual(angle(exp(1i*inverseDend)), angle(exp(1i*dend)), AbsTol=1e-10);
+        end
+
         function metricsSuiteRuns(testCase)
             results = opencrg_modernization_metrics();
 
