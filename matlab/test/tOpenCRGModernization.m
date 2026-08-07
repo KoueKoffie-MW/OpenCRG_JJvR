@@ -186,6 +186,31 @@ classdef tOpenCRGModernization < matlab.unittest.TestCase
             testCase.verifyTrue(all(isfinite(bankingData.b)));
         end
 
+        function derivativeFilterMasksRemainFinite(testCase)
+            data = crg_read(fullfile(testCase.CrgTextFolder, "handmade_curved.crg"));
+            filterMethods = {'sobel', '2diff', 'laplace'};
+
+            for methodIndex = 1:numel(filterMethods)
+                filtered = crg_filter(data, [], [], filterMethods{methodIndex}, [3 3], [1 1]);
+                finiteValues = filtered.z(~isnan(filtered.z));
+
+                testCase.verifySize(filtered.z, size(data.z));
+                testCase.verifyTrue(all(isfinite(finiteValues)));
+            end
+        end
+
+        function smoothFirfiltPreservesVectorOrientation(testCase)
+            columnInput = (1:20).';
+            rowInput = 1:20;
+
+            columnOutput = smooth_firfilt(columnInput, 3);
+            rowOutput = smooth_firfilt(rowInput, 3);
+
+            testCase.verifySize(columnOutput, size(columnInput));
+            testCase.verifySize(rowOutput, size(rowInput));
+            testCase.verifyEqual(columnOutput.', rowOutput);
+        end
+
         function metricsSuiteRuns(testCase)
             results = opencrg_modernization_metrics();
 

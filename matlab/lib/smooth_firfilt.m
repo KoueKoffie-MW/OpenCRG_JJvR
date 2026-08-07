@@ -63,7 +63,7 @@ function [y] = smooth_firfilt(x, w, opts)
 
 %% check inputs
 
-if isempty(w) || length(w) > 1 || ~isnumeric(w) || ~isreal(w) || w~=round(w) || w<=0,
+if isempty(w) || length(w) > 1 || ~isnumeric(w) || ~isreal(w) || w~=round(w) || w<=0
     error('Filter width must be a real, positive integer.')
 end
 

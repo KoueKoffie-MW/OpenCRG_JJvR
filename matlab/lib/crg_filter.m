@@ -127,17 +127,17 @@ switch fm
         fmask = binf([mask(1) 0, mask(2) 0], true);
     case 'sobel'
         fmask = binf([mask(1) 0, mask(2) 1], true);
-        if sum(sum(fmask)) == 0,
+        if sum(sum(fmask)) == 0
             fmask(round(mask(1)/2),round(mask(2)/2)) = fmask(round(mask(1)/2),round(mask(2)/2))+1;
         end
     case '2diff'
         fmask = binf([mask(1) 0, mask(2) 2], true);
-        if sum(sum(fmask)) == 0,
+        if sum(sum(fmask)) == 0
             fmask(round(mask(1)/2),round(mask(2)/2)) = fmask(round(mask(1)/2),round(mask(2)/2))+1;
         end
     case 'laplace'
         fmask = binf([mask(1) 2, mask(2) 2], true);
-        if sum(sum(fmask)) == 0,
+        if sum(sum(fmask)) == 0
             fmask(round(mask(1)/2),round(mask(2)/2)) = fmask(round(mask(1)/2),round(mask(2)/2))+1;
         end
 end
