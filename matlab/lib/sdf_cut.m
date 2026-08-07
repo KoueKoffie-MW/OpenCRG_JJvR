@@ -46,7 +46,7 @@ hc = upper(strcat('$', blockname));
 for i = 1:length(sdf_in)
     switch state
         case 0 % outside of $BLOCKNAME
-            if strcmp(upper(strtok(sdf_in{i}, ' !')), hc)
+            if strcmpi(strtok(sdf_in{i}, ' !'), hc)
                 state = 1; % begin of $BLOCKNAME detected
             else
                 sdf_out{end+1} = sdf_in{i}; %#ok<AGROW>

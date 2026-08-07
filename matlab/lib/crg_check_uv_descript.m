@@ -78,7 +78,7 @@ random_cnt  = 0;
 v = [];
 
 %% check uv_descript struct
-[vn vm] = size(uv_descript);
+[vn, ~] = size(uv_descript);
 for ii = 1:vn
     if iscellstr(uv_descript{ii,:}(1,1))
         switch char(posmode(strmatch(lower(strtrim(uv_descript{ii,1}{1,1})),lower(posmode))));

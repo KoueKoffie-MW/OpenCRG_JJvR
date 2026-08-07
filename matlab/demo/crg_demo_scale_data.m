@@ -52,9 +52,6 @@ end
 
 ubeg = data.head.ubeg;
 uend = data.head.uend;
-uinc = data.head.uinc;
-u = ubeg:uinc:uend;
-
 if isfield(data.head, 'vinc')
     vmin = data.head.vmin;
     vmax = data.head.vmax;
@@ -64,8 +61,6 @@ else
     v = data.v;
 end
 
-vmin = v(1);
-vmax = v(end);
 vn   = size(v,2);
 
 %% create longitudenal and lateral profile(s) like this and do the scaling

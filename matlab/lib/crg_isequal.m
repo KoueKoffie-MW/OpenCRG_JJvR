@@ -200,8 +200,9 @@ dd.v = v;
 dd.mean = abs(pza - pzb);           % arithmetic average
 dd.rmean = (pza.\pzb - 1).*100;     % relative arithmetric average
 
-if isempty(find(dd.mean < ceps == 0)) ...
-        ||  isempty(find(~((dd.mean < ceps) == isnan(dd.mean)) == 0))
+isBelowTolerance = dd.mean < ceps;
+isMissing = isnan(dd.mean);
+if ~any(~isBelowTolerance, "all") || all(isBelowTolerance ~= isMissing, "all")
     ident = 1;
 end
 

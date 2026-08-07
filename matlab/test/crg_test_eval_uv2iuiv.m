@@ -52,14 +52,14 @@ disp(sprintf('< %f > \t', u(iu)));
 
 data = crg_read('demo3.crg');
 
-[iu] = crg_eval_uv2iuiv(data, [] );
+crg_eval_uv2iuiv(data, [] );
 
 %% Test3 ( v-values constant vinc )
 
 data = crg_read('demo1.crg');
 v = data.head.vmin:data.head.vinc:data.head.vmax;
 
-[iu, iv] = crg_eval_uv2iuiv(data, [],  [-2 -1 -0.5, 0, 0.5, 1 2]);
+[~, iv] = crg_eval_uv2iuiv(data, [],  [-2 -1 -0.5, 0, 0.5, 1 2]);
 disp('Index: ');
 disp(sprintf('< %d > \t', iv));
 
@@ -72,7 +72,7 @@ disp(sprintf('< %f > \t', v(iv)));
 data = crg_read('demo3.crg');
 v = data.v;
 
-[iu, iv] = crg_eval_uv2iuiv(data, [],  [-2 -1 -0.5, 0, 0.5, 1 2]);
+[~, iv] = crg_eval_uv2iuiv(data, [],  [-2 -1 -0.5, 0, 0.5, 1 2]);
 disp('Index: ');
 disp(sprintf('< %d > \t', iv));
 

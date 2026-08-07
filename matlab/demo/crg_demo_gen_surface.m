@@ -72,9 +72,9 @@ uinc = crgrefl0.head.uinc;
 
 fprintf(1, 'searching along refline for valid measurements on cross cut [%d:%d]\n', 1, nu0);
 
-puv(:,1) = crgrefl0.head.ubeg + crgrefl0.head.uinc*[0:nu0-1]'; % PUV along refline
+puv(:,1) = crgrefl0.head.ubeg + crgrefl0.head.uinc*(0:nu0-1)'; % PUV along refline
 puv(:,2) = 0;
-[pxy, crgrefl] = crg_eval_uv2xy(crgrefl0, puv); % PXY along refline
+[pxy, ~] = crg_eval_uv2xy(crgrefl0, puv); % PXY along refline
 
 [pz , crgmeas] = crg_eval_xy2z(crgmeas, pxy); % PZ measurements along refline
 
@@ -250,7 +250,7 @@ for i = 1:is0
     if i == 1
         crgsurf = crgsurfi;
     else
-        [crgsurf roffi]= crg_append(crgsurf, crgsurfi);
+        [crgsurf, roffi]= crg_append(crgsurf, crgsurfi);
         if sqrt(roffi.rlox^2 + roffi.rloy^2 + roffi.rloz^2) > ceps*ulen
             warning('CRG:genWarning', 'inexpected position offset xyz=[%d %d %d]m applied by crg_append', roffi.rlox, roffi.rloy, roffi.rloz)
         end

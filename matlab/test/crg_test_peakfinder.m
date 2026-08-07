@@ -48,7 +48,7 @@ data.z(800, 50) = -0.5;            % 1x1   - 0.5
 iu = [1 1000];
 iv = [1 200];
 
-[pindex, pij] = crg_peakfinder( data, [], [], 0.5, 10);
+[~, pij] = crg_peakfinder( data, [], [], 0.5, 10);
 
 crg_show_peaks(data, pij, iu, iv, [], []);
 
@@ -64,7 +64,7 @@ data.z(800, 50) = -0.5;            % 1x1   - 0.5
 iu = [1 400];
 iv = [1 100];
 
-[pindex, pij] = crg_peakfinder( data, iu, iv, 0.5, 10);
+[~, pij] = crg_peakfinder( data, iu, iv, 0.5, 10);
 
 crg_show_peaks(data, pij, iu, iv);
 
@@ -80,7 +80,7 @@ data.z(800, 50) = -0.5;            % 1x1   - 0.5
 iu = [1 400];
 iv = [1 100];
 
-[pindex, pij] = crg_peakfinder( data, iu, iv, 0.5, 10);
+[~, pij] = crg_peakfinder( data, iu, iv, 0.5, 10);
 
 crg_show_peaks(data, pij, [], [], iu, iv);
 
