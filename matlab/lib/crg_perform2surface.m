@@ -79,7 +79,12 @@ end
 %% check the operator
 
 posoper = {'add' 'multiply'};
-switch char(posoper(strmatch(lower(strtrim(oper)),lower(posoper))))
+try
+    oper = validatestring(strtrim(oper), posoper);
+catch
+    error('CRG:checkError', 'Not a valid operand which can be performed to the data');
+end
+switch oper
     case 'add'
         oper = 'add';
     case 'multiply'
@@ -92,7 +97,12 @@ end
 
 [vn, ~] = size(uv_surf);
 for ii = 1:vn
-    switch char(posmode(strmatch(lower(strtrim(uv_surf{ii,1}{1,1})),lower(posmode))))
+    try
+        mode = validatestring(strtrim(uv_surf{ii,1}{1,1}), posmode);
+    catch
+        error('CRG:checkError', 'No valid uv_surf mode is specified');
+    end
+    switch mode
         case 'Ignore'
         case 'Profile'
             us = interp1(uv_surf{ii,1}{1,2}(1,:), uv_surf{ii,1}{1,2}(2,:), u, 'linear', 0);
@@ -155,7 +165,7 @@ for ii = 1:vn
                 end
             end
             txtnum = length(data.ct) + 1; data.ct{txtnum} = ['CRG random uv_surf(' num2str(ii) ') performed to surface'];
-        otherwise;
+        otherwise
             tmp = strcat({' '''},posrandmode,{''''});
             error('CRG:checkError', ['Cell array element of uv_surf{' num2str(ii) ',1}(1,5) must be one unambiguously abbrivation out of the strings: ' cat(2,tmp{:})]);
     end
@@ -213,7 +223,7 @@ function [ ibeg, iend ] = rangeind(a, afct)
 %
 
 narginchk(2, 2);
-error(nargoutchk(0, 2, nargout));
+nargoutchk(0, 2);
 
 if ~isa(afct,'function_handle')
     error('Second parameter must be a valid function_handle ...');

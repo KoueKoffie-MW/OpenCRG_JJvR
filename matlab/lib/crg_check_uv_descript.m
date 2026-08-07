@@ -80,8 +80,13 @@ v = [];
 %% check uv_descript struct
 [vn, ~] = size(uv_descript);
 for ii = 1:vn
-    if iscellstr(uv_descript{ii,:}(1,1))
-        switch char(posmode(strmatch(lower(strtrim(uv_descript{ii,1}{1,1})),lower(posmode))));
+    if iscellstr(uv_descript{ii,:}(1,1)) || isstring(uv_descript{ii,:}(1,1))
+        try
+            mode = validatestring(strtrim(uv_descript{ii,1}{1,1}), posmode);
+        catch
+            mode = '';
+        end
+        switch mode
             case char(posmode(1))
                 ignore_cnt = ignore_cnt + 1;
             case char(posmode(2))
