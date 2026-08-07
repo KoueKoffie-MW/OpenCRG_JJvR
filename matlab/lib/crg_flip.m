@@ -110,7 +110,7 @@ if ~isfield(data, 'struct')
     data.struct = cell(1,0);
 end
 data.struct{end+1} = ...
-    sprintf('* flipped by %s at %s', mfilename, datestr(now, 31));
+    sprintf('* flipped by %s at %s', mfilename, char(datetime("now", Format="yyyy-MM-dd HH:mm:ss")));
 
 %% check again
 

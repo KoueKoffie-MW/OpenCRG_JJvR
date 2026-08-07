@@ -250,7 +250,7 @@ if isfield(data, 'ct')
 else
     dout.ct = cell(1,0);
 end
-dout.ct{end+1} = sprintf('* modified by %s at %s', mfilename, datestr(now, 31));
+dout.ct{end+1} = sprintf('* modified by %s at %s', mfilename, char(datetime("now", Format="yyyy-MM-dd HH:mm:ss")));
 
 %% check
 

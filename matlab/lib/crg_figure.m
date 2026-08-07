@@ -64,7 +64,7 @@ if ~isfield(fopt, 'fnm')
     end
 end
 if ~isfield(fopt, 'dat')
-    fopt.dat = datestr(now, 31);
+    fopt.dat = char(datetime("now", Format="yyyy-MM-dd HH:mm:ss"));
 end
 
 

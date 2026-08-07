@@ -269,7 +269,7 @@ else
     data.ct = {};
 end
 
-data.ct{end+1} = sprintf('* modified by %s at %s', mfilename, datestr(now, 31));
+data.ct{end+1} = sprintf('* modified by %s at %s', mfilename, char(datetime("now", Format="yyyy-MM-dd HH:mm:ss")));
 
 %% force check
 data = crg_check(data);
