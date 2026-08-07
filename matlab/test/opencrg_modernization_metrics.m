@@ -59,6 +59,17 @@ if ~isempty(fixtures)
         "crg_eval_uv2z.100k", timeit(@() crg_eval_uv2z(data, puv)), "seconds", fixtures(end).Name);
 end
 
+if exist("roadrunnerHDMap", "file") == 2 && ~isempty(fixtures)
+    data = crg_read(fixtures(1).File);
+    rrhdSampleCount = min(100, size(data.z, 1));
+    rrhdTime = timeit(@() crg_write_rrhd(data, Write=false, ...
+        NumSamples=rrhdSampleCount, AddEdgeMarkings=false));
+    [metricNames, metricValues, metricUnits, metricNotes] = addMetric( ...
+        metricNames, metricValues, metricUnits, metricNotes, ...
+        "crg_write_rrhd.mapOnly", rrhdTime, "seconds", ...
+        "RoadRunner HD Map object creation with " + rrhdSampleCount + " samples");
+end
+
 results = table(metricNames, metricValues, metricUnits, metricNotes, ...
     VariableNames=["Metric", "Value", "Unit", "Notes"]);
 
