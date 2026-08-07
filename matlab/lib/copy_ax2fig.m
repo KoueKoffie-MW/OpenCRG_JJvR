@@ -59,7 +59,12 @@ function [] = copy_ax2fig()
 %
 % *****************************************************************
 
-[legend_h,object_h,plot_h,text_strings] = legend;
+legendObject = get(gca, 'Legend');
+if isempty(legendObject)
+    textStrings = {};
+else
+    textStrings = legendObject.String;
+end
 
 ax = copyobj(gca,figure);
 
@@ -70,12 +75,12 @@ set(ax,'ButtonDownFcn','');
 h_child=get(ax,'Children');
 set(h_child,'ButtonDownFcn','');
 
-if any(strcmp(get(h_child,'Type'),'surface'));
+if any(strcmp(get(h_child,'Type'),'surface'))
     colorbar;
-end;
+end
 
-if iscell(text_strings)
-    legend(text_strings)
+if ~isempty(textStrings)
+    legend(ax, textStrings)
 end
 
 end

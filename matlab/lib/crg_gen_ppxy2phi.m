@@ -93,7 +93,7 @@ end
 
 function [data, err] = ppxy2p0(ppxy, uinc)
 
-[breaks,coefs,l,k,d] = unmkpp(ppxy); %#ok<NASGU>
+[breaks, ~, ~, ~, ~] = unmkpp(ppxy);
 
 s0 = breaks(1);
 se = breaks(end);
@@ -132,7 +132,7 @@ end
 
 function [data, err] = ppxy2p1(ppxy, uinc)
 
-[breaks,coefs,l,k,d] = unmkpp(ppxy); %#ok<NASGU>
+[breaks, ~, ~, ~, ~] = unmkpp(ppxy);
 
 s0 = breaks(1);
 se = breaks(end);
@@ -189,7 +189,7 @@ end
 
 function [data, err] = ppxy2p2(ppxy, uinc)
 
-[breaks,coefs,l,k,d] = unmkpp(ppxy); %#ok<NASGU>
+[breaks, ~, ~, ~, ~] = unmkpp(ppxy);
 
 s0 = breaks(1);
 se = breaks(end);
@@ -247,7 +247,7 @@ end
 
 function [data, err] = ppxy2p3(ppxy, uinc)
 
-[breaks,coefs,l,k,d] = unmkpp(ppxy); %#ok<NASGU>
+[breaks, ~, ~, ~, ~] = unmkpp(ppxy);
 
 s0 = breaks(1);
 se = breaks(end);
@@ -309,7 +309,7 @@ end
 
 function [data, err] = ppxy2p4(ppxy, uinc)
 
-[breaks,coefs,l,k,d] = unmkpp(ppxy); %#ok<NASGU>
+[breaks, ~, ~, ~, ~] = unmkpp(ppxy);
 
 s0 = breaks(1);
 se = breaks(end);
@@ -373,7 +373,7 @@ end%% meth = 5
 
 function [data, err] = ppxy2p5(ppxy, uinc)
 
-[breaks,coefs,l,k,d] = unmkpp(ppxy); %#ok<NASGU>
+[breaks, ~, ~, ~, ~] = unmkpp(ppxy);
 
 s0 = breaks(1);
 se = breaks(end);
@@ -441,7 +441,7 @@ end
 
 function [data, err] = ppxy2p6(ppxy, uinc)
 
-[breaks,coefs,l,k,d] = unmkpp(ppxy); %#ok<NASGU>
+[breaks, ~, ~, ~, ~] = unmkpp(ppxy);
 
 s0 = breaks(1);
 se = breaks(end);
@@ -505,7 +505,7 @@ end
 
 function [data, err] = ppxy2p7(ppxy, uinc)
 
-[breaks,coefs,l,k,d] = unmkpp(ppxy); %#ok<NASGU>
+[breaks, ~, ~, ~, ~] = unmkpp(ppxy);
 
 s0 = breaks(1);
 se = breaks(end);
@@ -570,7 +570,7 @@ end
 
 function [data, err] = ppxy2p8(ppxy, uinc)
 
-[breaks,coefs,l,k,d] = unmkpp(ppxy); %#ok<NASGU>
+[breaks, ~, ~, ~, ~] = unmkpp(ppxy);
 
 s0 = breaks(1);
 se = breaks(end);
