@@ -280,6 +280,44 @@ classdef tOpenCRGModernization < matlab.unittest.TestCase
             testCase.verifyEqual(checked.il, (size(data.z, 2)-1)*ones(1, size(data.z, 1)));
         end
 
+        function crgWriteRRHDExportsReadableMap(testCase)
+            testCase.assumeTrue(exist("roadrunnerHDMap", "file") == 2, ...
+                "RoadRunner HD Map API is unavailable.");
+            fixture = testCase.applyFixture(matlab.unittest.fixtures.TemporaryFolderFixture());
+            sourceFile = fullfile(testCase.CrgTextFolder, "handmade_curved.crg");
+            rrhdFile = fullfile(fixture.Folder, "handmade_curved.rrhd");
+
+            [rrMap, data, geometry] = crg_write_rrhd(sourceFile, rrhdFile, ...
+                NumSamples=16, GeoReference=[51 9]);
+            readBackMap = roadrunnerHDMap;
+            read(readBackMap, rrhdFile);
+
+            testCase.verifyTrue(isfile(rrhdFile));
+            testCase.verifyNumElements(rrMap.Lanes, 1);
+            testCase.verifyNumElements(rrMap.LaneBoundaries, 2);
+            testCase.verifyEqual(rrMap.GeoReference, [51 9]);
+            testCase.verifyNumElements(readBackMap.Lanes, 1);
+            testCase.verifyNumElements(readBackMap.LaneBoundaries, 2);
+            testCase.verifySize(rrMap.Lanes(1).Geometry, [16 3]);
+            testCase.verifyEqual(geometry.CenterV, 0);
+            testCase.verifyEqual(geometry.LaneVLimits, [data.head.vmin data.head.vmax]);
+            testCase.verifyEqual(readBackMap.Lanes(1).ID, "Lane1");
+        end
+
+        function crgWriteRRHDSupportsMapOnlyCreation(testCase)
+            testCase.assumeTrue(exist("roadrunnerHDMap", "file") == 2, ...
+                "RoadRunner HD Map API is unavailable.");
+            data = crg_read(fullfile(testCase.CrgTextFolder, "handmade_curved.crg"));
+
+            [rrMap, ~, geometry] = crg_write_rrhd(data, Write=false, ...
+                NumSamples=8, AddEdgeMarkings=false);
+
+            testCase.verifyNumElements(rrMap.Lanes, 1);
+            testCase.verifyEmpty(rrMap.LaneMarkings);
+            testCase.verifySize(geometry.LeftBoundary, [8 3]);
+            testCase.verifySize(geometry.RightBoundary, [8 3]);
+        end
+
         function metricsSuiteRuns(testCase)
             results = opencrg_modernization_metrics();
 
