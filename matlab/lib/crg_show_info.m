@@ -215,15 +215,10 @@ set(a, 'Position', p0);
 
 %% right annotation textbox
 
-c = cell(1,0);
-
-c{end+1} = 'CRG comment data:';
-c{end+1} = '';
-
 if isfield(data, 'ct')
-    for i = 1:length(data.ct)
-        c{end+1} = data.ct{i}; %#ok<AGROW>
-    end
+    c = [{'CRG comment data:', ''}, reshape(data.ct, 1, [])];
+else
+    c = {'CRG comment data:', ''};
 end
 
 p0 = [0.52 0.07 0.46 0.86];

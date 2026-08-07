@@ -36,14 +36,20 @@ function [sdf_out] = sdf_add(sdf_in, blockname, sdf_block)
 %
 % *****************************************************************
 
-sdf_out = sdf_in;
+sdfCount = numel(sdf_in);
+blockCount = numel(sdf_block);
+sdf_out = cell(1, sdfCount + blockCount + 2);
+sdf_out(1:sdfCount) = sdf_in;
 
-sdf_out{end+1} = strcat('$', blockname);
+outIndex = sdfCount + 1;
+sdf_out{outIndex} = strcat('$', blockname);
 for i = 1:length(sdf_block)
+    outIndex = outIndex + 1;
     if strncmp(sdf_block{i}, '$', 1)
-        sdf_out{end+1} = strcat('$', sdf_block{i}); %#ok<AGROW>
+        sdf_out{outIndex} = strcat('$', sdf_block{i});
     else
-        sdf_out{end+1} = sdf_block{i}; %#ok<AGROW>
+        sdf_out{outIndex} = sdf_block{i};
     end
 end
-sdf_out{end+1} = '$';
+outIndex = outIndex + 1;
+sdf_out{outIndex} = '$';

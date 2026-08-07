@@ -48,6 +48,12 @@ classdef tOpenCRGModernization < matlab.unittest.TestCase
             testCase.verifyEqual(remainder, {'keep before', 'keep after'});
         end
 
+        function sdfAddEscapesNestedBlockMarkers(testCase)
+            output = sdf_add({'before'}, 'TARGET', {'value', '$nested'});
+
+            testCase.verifyEqual(output, {'before', '$TARGET', 'value', '$$nested', '$'});
+        end
+
         function longRecordsAreTruncatedOnWrite(testCase)
             fixture = testCase.applyFixture(matlab.unittest.fixtures.TemporaryFolderFixture());
             file = fullfile(fixture.Folder, "long-record.crg");

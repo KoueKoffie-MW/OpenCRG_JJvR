@@ -57,12 +57,8 @@ crgdat.struct = cell(1,0);
 
 %% generate struct data block $CT with comment text
 
-c = cell(1,0);
-
 if isfield(data, 'ct')
-    for i=1:length(data.ct)
-        c{end+1} = data.ct{i}; %#ok<AGROW>
-    end
+    c = data.ct;
 else
     error('CRG:writeError', 'comment text in DATA.ct missing')
 end
