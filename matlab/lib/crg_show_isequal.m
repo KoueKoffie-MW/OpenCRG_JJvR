@@ -71,7 +71,7 @@ figure('Position', scrpos)
 [xi, yi] = meshgrid(dd.u,dd.v);
 
 subplot(3,1,1)
-hist(dd.mean)
+histogram(dd.mean(:))
 set(    gca             , 'ButtonDownFcn','copy_ax2fig')
 set(get(gca, 'Children'), 'ButtonDownFcn','copy_ax2fig')
 

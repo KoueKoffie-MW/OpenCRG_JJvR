@@ -255,7 +255,7 @@ xlim(1) = -Inf;
 xlim(end) = Inf;
 
 % Bin data
-[~, ibin] = histc(x,xlim);
+ibin = discretize(x, xlim);
 
 % Evaluate polynomial base
 t = (x - xb(ibin))./hb(ibin);

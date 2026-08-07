@@ -104,6 +104,38 @@ classdef tOpenCRGModernization < matlab.unittest.TestCase
             testCase.verifyGreaterThan(max(differenceData.mean(:)), 0);
         end
 
+        function pxy2PpxyHandlesSplineBreakBoundaries(testCase)
+            x = (0:0.1:4).';
+            pxy = [x sin(x)];
+            pxy = [pxy(1:11, :); pxy(11, :); pxy(12:end, :)];
+
+            ppxy = crg_gen_pxy2ppxy(pxy, struct("sf_incr", 0.75, "ss_spar", 0.99));
+            values = ppval(ppxy, ppxy.breaks);
+
+            testCase.verifyEqual(ppxy.form, 'pp');
+            testCase.verifyEqual(ppxy.pieces, numel(ppxy.breaks)-1);
+            testCase.verifyTrue(all(isfinite(real(values)), "all"));
+            testCase.verifyTrue(all(isfinite(imag(values)), "all"));
+        end
+
+        function showIsequalCreatesHistogramGraphic(testCase)
+            data = crg_read(fullfile(testCase.CrgTextFolder, "handmade_curved.crg"));
+            [~, differenceData] = crg_isequal(data, data);
+            initialFigures = findall(groot, Type="figure");
+            oldVisibility = get(groot, "DefaultFigureVisible");
+
+            testCase.addTeardown(@() set(groot, "DefaultFigureVisible", oldVisibility));
+            set(groot, "DefaultFigureVisible", "off");
+            crg_show_isequal(differenceData);
+
+            newFigures = setdiff(findall(groot, Type="figure"), initialFigures);
+            testCase.addTeardown(@() close(newFigures));
+            histogramObjects = findall(newFigures, Type="histogram");
+
+            testCase.verifyNotEmpty(newFigures);
+            testCase.verifyNotEmpty(histogramObjects);
+        end
+
         function metricsSuiteRuns(testCase)
             results = opencrg_modernization_metrics();
 
