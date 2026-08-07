@@ -174,6 +174,18 @@ classdef tOpenCRGModernization < matlab.unittest.TestCase
             testCase.verifyTrue(isfield(dat, "proj"));
         end
 
+        function slopeAndBankingExtractionProduceFiniteProfiles(testCase)
+            data = crg_read(fullfile(testCase.CrgTextFolder, "handmade_curved.crg"));
+
+            slopeData = crg_ext_slope(data, 0.5);
+            bankingData = crg_ext_banking(data, 0.5);
+
+            testCase.verifyTrue(isfield(slopeData, "s"));
+            testCase.verifyTrue(isfield(bankingData, "b"));
+            testCase.verifyTrue(all(isfinite(slopeData.s)));
+            testCase.verifyTrue(all(isfinite(bankingData.b)));
+        end
+
         function metricsSuiteRuns(testCase)
             results = opencrg_modernization_metrics();
 

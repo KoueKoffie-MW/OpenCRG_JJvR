@@ -419,22 +419,22 @@ function [yy] = spl_smooth(x, y, p, xx, ext, v)
 %    modified by Per A. Brodtkorb  23.09.98
 %      secret option forcing linear extrapolation outside the ends when p>0
 
-if (nargin<5)||(isempty(ext)),
+if (nargin<5)||(isempty(ext))
   ext=0; %do not force linear extrapolation in the ends (default)
 end
 
 [xi,ind]=sort(x(:));
 n = length(xi);
 y = y(:);
-if n<2,
+if n<2
    error('There must be >=2 data points.')
-elseif any(diff(xi)<=0),
+elseif any(diff(xi)<=0)
    error('Two consecutive values in x can not be equal.')
-elseif n~=length(y),
+elseif n~=length(y)
    error('x and y must have the same length.')
 end
 
-if nargin<6||isempty(v),
+if nargin<6||isempty(v)
   v = ones(n,1);  %not implemented yet
 else
   v=v(:);
@@ -468,7 +468,7 @@ else
 
   ci = 3*p*[0;u];
 
-  if ext && p~=0 && n>3, %Forcing linear extrapolation in the ends
+  if ext && p~=0 && n>3 %Forcing linear extrapolation in the ends
     ci([2,  end]) = 0;
   % New call
   % fixing the coefficients so that we have continous
@@ -483,7 +483,7 @@ else
 end
 
 pp = mkpp(xi,coefs);
-if (nargin<4)||(isempty(xx)),
+if (nargin<4)||(isempty(xx))
   yy = pp;
 else
   yy = ppval(pp,xx);
