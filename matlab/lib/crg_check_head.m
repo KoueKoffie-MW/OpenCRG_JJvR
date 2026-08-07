@@ -86,7 +86,6 @@ data.head = head;
 %% some local variables
 
 crgeps = data.opts.ceps;
-crgtol = data.opts.ctol;
 mininc = data.opts.cinc*(1-crgeps);
 midinc = data.opts.cinc;
 

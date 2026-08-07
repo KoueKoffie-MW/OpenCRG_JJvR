@@ -181,7 +181,7 @@ function [s_out, faz_out, baz_out] = wgs84dist(varargin)
   rad2deg = 180 / pi;
   deg2rad = 1.0 / rad2deg;
 
-  zero = 0.0; one = 1.0; two = 2.0;three = 3.0; four = 4.0; six = 6.0;
+  one = 1.0; two = 2.0;three = 3.0; four = 4.0; six = 6.0;
   three_eighths = 3.0 / 8.0; sixteen = 16.0;
 
 %------------------------------------------------------------------------------

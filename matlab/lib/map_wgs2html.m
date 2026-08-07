@@ -136,9 +136,6 @@ if isfield(opts, 'tcolorin')
         end
     end
 else
-    scolor{1} = '0099e6'; % blue
-    % other colors
-
     for ic = 1:nc
         tcolorin{ic} = '0099e6'; %#ok<AGROW>
     end
@@ -155,25 +152,8 @@ if isfield(opts, 'tcolorout')
         end
     end
 else
-    scolor{1} = '006ea5'; % blue
-    % other colors
-
     for ic = 1:nc
         tcolorout{ic} = '006ea5'; %#ok<AGROW>
-    end
-end
-
-if isfield(opts, 'topaci')
-    if iscell(opts.topaci)
-        topaci = opts.topaci;
-    else
-        for ic = 1:nc
-            topaci{ic} = opts.topaci; %#ok<AGROW>
-        end
-    end
-else
-    for ic = 1:nc
-        topaci{ic} = 1; %#ok<AGROW>
     end
 end
 

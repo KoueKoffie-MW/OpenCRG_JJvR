@@ -55,9 +55,9 @@ sxy = [0 cumsum(abs(diff(cxy)))];  % chainage of points
 
 %% eliminate consecutive pxy/cxy duplicates (with 0 chainage increment)
 
-[sxy, m, n] = unique(sxy); %#ok<NASGU>
+[sxy, m] = unique(sxy);
 cxy = cxy(m);
-clear m n
+clear m
 
 %% reduce number of points to a reasonable amount
 
@@ -69,7 +69,7 @@ end
 
 if mean(diff(sxy)) < 0.25*sf_incr
     sxy1 = linspace(sxy(1), sxy(end), ceil((sxy(end)-sxy(1))/sf_incr));
-    % TODO: alternativ auch jeder n-te (erhält Dichteverteilung)
+    % TODO: alternativ auch jeder n-te (erhï¿½lt Dichteverteilung)
 
     % splinefit only works on real data ...
 
@@ -255,7 +255,7 @@ xlim(1) = -Inf;
 xlim(end) = Inf;
 
 % Bin data
-[junk,ibin] = histc(x,xlim);
+[~, ibin] = histc(x,xlim);
 
 % Evaluate polynomial base
 t = (x - xb(ibin))./hb(ibin);
@@ -290,7 +290,7 @@ C = sparse(ii, jj, cc, 4*nb-4, nu);
 % Compute a base Z for the null space of B (B*Z = 0)
 if nb < 60
     % QR-factorization is efficient for small problems
-    [Q,R] = qr(full(B')); %#ok<NASGU>
+    [Q, ~] = qr(full(B'));
     Z = Q(:,mb+1:nu);
 else
     % For larger problems we need a sparse null space base.

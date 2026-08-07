@@ -63,7 +63,7 @@ enh_utm = map_geod2pmap_tm(llh, mpro.gell, mpro.proj)
 llh = map_pmap2geod_tm(enh_utm,  mpro.gell, mpro.proj);
 
 % WGS84 llh radian -> WGS84 llh degree
-llh = [180/pi*llh(1), 180/pi*llh(2), llh(3)]
+disp([180/pi*llh(1), 180/pi*llh(2), llh(3)])
 
 %% Test2 (GK with datum transformation)
 fprintf('%% Test2 (GK with datum transformation)')
@@ -94,7 +94,7 @@ enh_gk = map_global2plocal(llh, mpro2)
 llh = map_plocal2global(enh_gk, mpro2);
 
 % WGS84 llh radian -> WGS84 llh degree
-llh = [180/pi*llh(1), 180/pi*llh(2), llh(3)]
+disp([180/pi*llh(1), 180/pi*llh(2), llh(3)])
 
 
 %% Test3 (GK to UTM)

@@ -55,6 +55,7 @@ ell = map_check_elli(ell);
 
 %% apply projection
 
+nm = pro.nm;
 if ~isempty(nm)
     a = regexp([upper(nm) '_'], '_', 'split');
     nm = a{1};
