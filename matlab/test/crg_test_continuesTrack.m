@@ -1,5 +1,6 @@
-%% Usage of continuesTrack
-% Test scripts to display results of continues track (option) settings.
+function crg_test_continuesTrack(options)
+%CRG_TEST_CONTINUESTRACK Display continuous-track option behavior.
+% Test function to display results of continuous track option settings.
 % Examples are included.
 % The file comments are optimized for the matlab publishing macro.
 
@@ -30,18 +31,27 @@
 % * display extrapolation > uend
 % * display extrapolation < ubeg
 
-% DEFAULT SETTINGS
-% display results
-bmode = [0 4];      % border mode [0 4] <=> (0 to 4); [1 1] <=> (only 1)
-use_b = 1;          % incl. banking (0/1)
-use_s = 1;          % incl. slope (0/1)
+arguments
+    options.BorderMode (1, 2) double = [0 4]
+    options.UseBanking (1, 1) logical = true
+    options.UseSlope (1, 1) logical = true
+    options.UIncrement (1, 1) double = 0.1
+    options.VIncrement (1, 1) double = 0.1
+    options.StartUOffset (1, 1) double = 50
+    options.EndUOffset (1, 1) double = 50
+    options.StartVOffset (1, 1) double = 1
+    options.EndVOffset (1, 1) double = 1
+end
 
-d_uinc  = 0.1;      % debug: uinc (0 => data.dved.uinc)
-d_vinc  = 0.1;      % debug: vinc (0 => data.dved.vinc)
-d_suo   = 50;       % debug: ubeg offset
-d_euo   = 50;       % debug: uend offset
-d_svo   = 1;        % debug: vmin offset
-d_evo   = 1;        % debug: vmax offset
+bmode = options.BorderMode;
+useBanking = options.UseBanking;
+useSlope = options.UseSlope;
+uIncrement = options.UIncrement;
+vIncrement = options.VIncrement;
+startUOffset = options.StartUOffset;
+endUOffset = options.EndUOffset;
+startVOffset = options.StartVOffset;
+endVOffset = options.EndVOffset;
 
 %% Test1 ( continues track - intersection )
 
@@ -60,13 +70,13 @@ s = { LS1   { (S1e-S1s)/LS1 } ...
 b = { LB1    { (B1e-B1s)/LB1 } ...
     };
 
-if ~use_b, b = []; end
-if ~use_s, s = []; end
+if ~useBanking, b = []; end
+if ~useSlope, s = []; end
 
 data = crg_gen_csb2crg0([0.1,0.1], ulength, 2, c, s, b);
 
 % z-values
-[nu nv] = size(data.z);
+[nu, nv] = size(data.z);
 nunv_max = ceil(nu/nv);
 
 z = 0.01*peaks(nv);
@@ -77,14 +87,12 @@ data.z = data.z + 0.03;
 data = crg_check(data);
 
 % dimensions
-ubeg = data.head.ubeg-d_suo;
-uend = data.head.uend+d_euo;
-if d_uinc, uinc = d_uinc; else
+if uIncrement ~= 0, uinc = uIncrement; else
     uinc = data.head.uinc; end
 
-vmin = data.head.vmin-d_svo;
-vmax = data.head.vmax+d_evo;
-if d_vinc, vinc = d_vinc; else
+vmin = data.head.vmin-startVOffset;
+vmax = data.head.vmax+endVOffset;
+if vIncrement ~= 0, vinc = vIncrement; else
     vinc = data.head.vinc; end
 
 % visualisation for each border mode
@@ -98,10 +106,10 @@ for i = bmode(1):bmode(2)
     data = crg_check(data);
 
     % extrapolation > uend
-    crg_show_road_uv2surface(data, [data.head.uend-20:uinc:data.head.uend+50], [vmin:vinc:vmax]);
+    crg_show_road_uv2surface(data, data.head.uend-20:uinc:data.head.uend+endUOffset, vmin:vinc:vmax);
 
     % extrapolation < ubeg
-    crg_show_road_uv2surface(data, [data.head.ubeg-50:uinc:data.head.ubeg+20], [vmin:vinc:vmax]);
+    crg_show_road_uv2surface(data, data.head.ubeg-startUOffset:uinc:data.head.ubeg+20, vmin:vinc:vmax);
 
 end
 
@@ -129,13 +137,13 @@ s = { LS1   { (S1e-S1s)/LS1 } ...
 b = { LB1    { (B1e-B1s)/LB1 } ...
     };
 
-if ~use_b, b = []; end
-if ~use_s, s = []; end
+if ~useBanking, b = []; end
+if ~useSlope, s = []; end
 
 data = crg_gen_csb2crg0([0.1,0.1], ulength, 2, c, s, b);
 
 % z-values
-[nu nv] = size(data.z);
+[nu, nv] = size(data.z);
 nunv_max = ceil(nu/nv);
 
 z = 0.01*peaks(nv);
@@ -151,14 +159,12 @@ data.mods = mdop;
 data = crg_mods(data);
 
 % dimensions
-ubeg = data.head.ubeg-d_suo;
-uend = data.head.uend+d_euo;
-if d_uinc, uinc = d_uinc; else
+if uIncrement ~= 0, uinc = uIncrement; else
     uinc = data.head.uinc; end
 
-vmin = data.head.vmin-d_svo;
-vmax = data.head.vmax+d_evo;
-if d_vinc, vinc = d_vinc; else
+vmin = data.head.vmin-startVOffset;
+vmax = data.head.vmax+endVOffset;
+if vIncrement ~= 0, vinc = vIncrement; else
     vinc = data.head.vinc; end
 
 % visualisation for each border mode
@@ -172,9 +178,11 @@ for i = bmode(1):bmode(2)
     data = crg_check(data);
 
     % extrapolation > uend
-    crg_show_road_uv2surface(data, [data.head.uend-20:uinc:data.head.uend+50], [vmin:vinc:vmax]);
+    crg_show_road_uv2surface(data, data.head.uend-20:uinc:data.head.uend+endUOffset, vmin:vinc:vmax);
 
     % extrapolation < ubeg
-    crg_show_road_uv2surface(data, [data.head.ubeg-50:uinc:data.head.ubeg+20], [vmin:vinc:vmax]);
+    crg_show_road_uv2surface(data, data.head.ubeg-startUOffset:uinc:data.head.ubeg+20, vmin:vinc:vmax);
+
+end
 
 end
