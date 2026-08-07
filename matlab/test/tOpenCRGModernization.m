@@ -136,6 +136,18 @@ classdef tOpenCRGModernization < matlab.unittest.TestCase
             testCase.verifyNotEmpty(histogramObjects);
         end
 
+        function crgFlipRoundTripPreservesHeading(testCase)
+            data = crg_read(fullfile(testCase.CrgTextFolder, "handmade_curved.crg"));
+            flipped = crg_flip(data);
+            restored = crg_flip(flipped);
+
+            testCase.verifyEqual(flipped.p, angle(-exp(1i*data.p(end:-1:1))), AbsTol=single(1e-6));
+            testCase.verifyEqual(restored.z, data.z);
+            testCase.verifyEqual(restored.p, data.p, AbsTol=single(1e-6));
+            testCase.verifyEqual(restored.head.pbeg, data.head.pbeg, AbsTol=1e-12);
+            testCase.verifyEqual(restored.head.pend, data.head.pend, AbsTol=1e-12);
+        end
+
         function metricsSuiteRuns(testCase)
             results = opencrg_modernization_metrics();
 

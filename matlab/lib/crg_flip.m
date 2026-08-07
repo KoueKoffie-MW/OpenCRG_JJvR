@@ -54,7 +54,7 @@ if length(dat0.v) > 1
     data.v = -dat0.v(end:-1:1);
 end
 if isfield(dat0, 'p')
-    data.p = angle(-exp(i*dat0.p(end:-1:1)));
+    data.p = angle(-exp(1i*dat0.p(end:-1:1)));
 end
 if isfield(dat0, 's')
     data.s = -dat0.s(end:-1:1);
@@ -81,8 +81,8 @@ data.head.send = -dat0.head.sbeg;
 data.head.bbeg = -dat0.head.bend;
 data.head.bend = -dat0.head.bbeg;
 
-data.head.pbeg = angle(-exp(i*dat0.head.pend));
-data.head.pend = angle(-exp(i*dat0.head.pbeg));
+data.head.pbeg = angle(-exp(1i*dat0.head.pend));
+data.head.pend = angle(-exp(1i*dat0.head.pbeg));
 
 % WGS84: beg or beg/end allowed, end only not allowed
 if isfield(dat0.head, 'eend')

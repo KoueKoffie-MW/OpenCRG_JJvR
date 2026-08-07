@@ -106,7 +106,7 @@ p = single(angle(diff(r)));
 % calculate integration error for last point
 
 r1 = r(end); % by spline evaluation at last position
-r2 = r(1) + sum(uinc.*exp(i*double(p))); % by phi integration
+r2 = r(1) + sum(uinc.*exp(1i*double(p))); % by phi integration
 err = abs(r2-r1);
 
 % save CRG data
@@ -163,7 +163,7 @@ p = p(1:np);
 % calculate integration error for last point
 
 r1 = ppval(ppxy, s1); % by spline evaluation at last position s1
-r2 = ppval(ppxy, s0) + sum(uinc.*exp(i*double(p))); % by phi integration
+r2 = ppval(ppxy, s0) + sum(uinc.*exp(1i*double(p))); % by phi integration
 err = abs(r2-r1);
 
 % save CRG data
@@ -221,7 +221,7 @@ p = p(1:np);
 % calculate integration error for last point
 
 r1 = ppval(ppxy, s1); % by spline evaluation at last position s1
-r2 = ppval(ppxy, s0) + sum(uinc.*exp(i*double(p))); % by phi integration
+r2 = ppval(ppxy, s0) + sum(uinc.*exp(1i*double(p))); % by phi integration
 err = abs(r2-r1);
 
 % save CRG data
@@ -283,7 +283,7 @@ p = p(1:np);
 % calculate integration error for last point
 
 r1 = ppval(ppxy, s1); % by spline evaluation at last position s1
-r2 = ppval(ppxy, s0) + sum(uinc.*exp(i*double(p))); % by phi integration
+r2 = ppval(ppxy, s0) + sum(uinc.*exp(1i*double(p))); % by phi integration
 err = abs(r2-r1);
 
 % save CRG data
@@ -347,7 +347,7 @@ p = p(1:np);
 % calculate integration error for last point
 
 r1 = ppval(ppxy, s1); % by spline evaluation at last position s1
-r2 = ppval(ppxy, s0) + sum(uinc.*exp(i*double(p))); % by phi integration
+r2 = ppval(ppxy, s0) + sum(uinc.*exp(1i*double(p))); % by phi integration
 err = abs(r2-r1);
 
 % save CRG data
@@ -415,7 +415,7 @@ p = p(1:np);
 % calculate integration error for last point
 
 r1 = ppval(ppxy, s1); % by spline evaluation at last position s1
-r2 = ppval(ppxy, s0) + sum(uinc.*exp(i*double(p))); % by phi integration
+r2 = ppval(ppxy, s0) + sum(uinc.*exp(1i*double(p))); % by phi integration
 err = abs(r2-r1);
 
 % save CRG data
@@ -470,7 +470,7 @@ while s1 < se
     f  = uinc/abs(d1);
     ds = f*uinc;
     p(np) = single(angle(d1));
-    r1 = r1 + uinc*exp(i*double(p(np)));
+    r1 = r1 + uinc*exp(1i*double(p(np)));
     s1 = s1 + ds;
 end
 
@@ -479,7 +479,7 @@ p = p(1:np);
 % calculate integration error for last point
 
 r1 = ppval(ppxy, s1); % by spline evaluation at last position s1
-r2 = ppval(ppxy, s0) + sum(uinc.*exp(i*double(p))); % by phi integration
+r2 = ppval(ppxy, s0) + sum(uinc.*exp(1i*double(p))); % by phi integration
 err = abs(r2-r1);
 
 % save CRG data
@@ -535,7 +535,7 @@ while s1 < se
     f  = uinc/abs(d1);
     ds = f*ds;
     p(np) = single(angle(d1));
-    r1 = r1 + uinc*exp(i*double(p(np)));
+    r1 = r1 + uinc*exp(1i*double(p(np)));
     s1 = s1 + ds;
 end
 
@@ -544,7 +544,7 @@ p = p(1:np);
 % calculate integration error for last point
 
 r1 = ppval(ppxy, s1); % by spline evaluation at last position s1
-r2 = ppval(ppxy, s0) + sum(uinc.*exp(i*double(p))); % by phi integration
+r2 = ppval(ppxy, s0) + sum(uinc.*exp(1i*double(p))); % by phi integration
 err = abs(r2-r1);
 
 % save CRG data
@@ -603,7 +603,7 @@ while s1 < se
         if abs(f-1) < 1e-10, break, end
     end
     p(np) = single(angle(d1));
-    r1 = r1 + uinc*exp(i*double(p(np)));
+    r1 = r1 + uinc*exp(1i*double(p(np)));
     s1 = s1 + ds;
 end
 
@@ -612,7 +612,7 @@ p = p(1:np);
 % calculate integration error for last point
 
 r1 = ppval(ppxy, s1); % by spline evaluation at last position s1
-r2 = ppval(ppxy, s0) + sum(uinc.*exp(i*double(p))); % by phi integration
+r2 = ppval(ppxy, s0) + sum(uinc.*exp(1i*double(p))); % by phi integration
 err = abs(r2-r1);
 
 % save CRG data
