@@ -1,4 +1,4 @@
-function [enh ell pro] = map_geod2pmap(llh, ell, pro)
+function [enh, ell, pro] = map_geod2pmap(llh, ell, pro)
 % MAP_GEOD2PMAP Forward map projection.
 %   [ENH ELL PRO] = MAP_GEOD2PMAP_TM(LLH, ELL, PRO) converts points from
 %   geodetic coordinates to map coordinates using a forward projection.
@@ -64,11 +64,11 @@ end
 if ~isempty(nm)
     switch nm
         case 'GK3' % Gauss-Krueger 3deg zones
-            [enh ell pro] = map_geod2pmap_tm(llh, ell, pro);
+            [enh, ell, pro] = map_geod2pmap_tm(llh, ell, pro);
         case 'GK6' % Gauss-Krueger 6deg zones
-            [enh ell pro] = map_geod2pmap_tm(llh, ell, pro);
+            [enh, ell, pro] = map_geod2pmap_tm(llh, ell, pro);
         case 'UTM' % Universal Transverse Mercator
-            [enh ell pro] = map_geod2pmap_tm(llh, ell, pro);
+            [enh, ell, pro] = map_geod2pmap_tm(llh, ell, pro);
         otherwise
             error('MAP:checkError', 'unknown projection name %s', nm)
     end

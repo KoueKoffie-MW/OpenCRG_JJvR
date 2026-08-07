@@ -1,4 +1,4 @@
-function [enh dat] = map_global2plocal(llh, dat)
+function [enh, dat] = map_global2plocal(llh, dat)
 % MAP_GLOBAL2PLOCAL Forward projection: global to projected local.
 %   [ENH DAT] = MAP_GLOBAL2PLOCAL(LLH, DAT) converts points from
 %   global geodetic coordinates to local map coordinates by transformation from
@@ -66,12 +66,12 @@ llh_globl = llh;
 if isequal(gell, lell) && strcmp(tran.nm, 'NOP')
     llh_local = llh_globl;
 else
-    [xyz_globl gell] = map_geod2ecef(llh_globl, gell);
-    [xyz_local tran] = map_ecef2ecef(xyz_globl, tran, 'F');
-    [llh_local lell] = map_ecef2geod(xyz_local, lell);
+    [xyz_globl, gell] = map_geod2ecef(llh_globl, gell);
+    [xyz_local, tran] = map_ecef2ecef(xyz_globl, tran, 'F');
+    [llh_local, lell] = map_ecef2geod(xyz_local, lell);
 end
 
-[enh_local lell proj] = map_geod2pmap_tm(llh_local, lell, proj);
+[enh_local, lell, proj] = map_geod2pmap_tm(llh_local, lell, proj);
 
 %% prepare outputs
 

@@ -162,6 +162,18 @@ classdef tOpenCRGModernization < matlab.unittest.TestCase
             testCase.verifyEqual(angle(exp(1i*inverseDend)), angle(exp(1i*dend)), AbsTol=1e-10);
         end
 
+        function mapLocalGlobalRoundTrip(testCase)
+            llh = [deg2rad(48.8566) deg2rad(2.3522) 35; ...
+                deg2rad(51.477811) deg2rad(-0.001475) 45];
+
+            [enh, dat] = map_global2plocal(llh, 'UTM_31U');
+            [roundTrip, dat] = map_plocal2global(enh, dat);
+
+            testCase.verifySize(enh, size(llh));
+            testCase.verifyEqual(roundTrip, llh, AbsTol=1e-10);
+            testCase.verifyTrue(isfield(dat, "proj"));
+        end
+
         function metricsSuiteRuns(testCase)
             results = opencrg_modernization_metrics();
 
