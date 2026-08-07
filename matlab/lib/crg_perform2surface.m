@@ -121,8 +121,8 @@ for ii = 1:vn
             if strcmp(oper,'multiply'), identelem = 1; end
             [ubind, ueind] = rangeind(us, @(x) find((x ~= identelem) | (x == identelem)));
             [vbind, veind] = rangeind(vs, @(x) find((x ~= identelem) | (x == identelem)));
-            rand('twister',5489);    % default initial state
-            rand('twister', uv_surf{ii,1}{1,4});
+            previousRngState = rng(uv_surf{ii,1}{1,4}, 'twister');
+            restoreRngState = onCleanup(@() rng(previousRngState));
             if isfloat(uv_surf{ii,1}{1,5}), amplmin = uv_surf{ii,1}{1,5}; end
             if isfloat(uv_surf{ii,1}{1,6}), amplmax = uv_surf{ii,1}{1,6}; end
             if isfloat(uv_surf{ii,1}{1,7}) && uv_surf{ii,1}{1,7} >= 0 && uv_surf{ii,1}{1,7} <= 1
