@@ -76,6 +76,36 @@ verifySize(testCase, xy, [25 2]);
 verifyTrue(testCase, all(isfinite(xy), "all"));
 end
 
+function testUv2zVectorizedMatchesScalarCalls(testCase)
+files = [
+    fullfile(testCase.TestData.CrgText, "handmade_curved.crg")
+    fullfile(testCase.TestData.CrgBinary, "belgian_block.crg")
+    ];
+
+for file = files.'
+    baseData = crg_read(file);
+    u = linspace(baseData.head.ubeg - 2*baseData.head.uinc, baseData.head.uend + 2*baseData.head.uinc, 40).';
+    v = linspace(baseData.head.vmin - 1, baseData.head.vmax + 1, 40).';
+    puv = [u v];
+
+    for bdmu = 0:4
+        for bdmv = 0:4
+            data = baseData;
+            data.opts.bdmu = bdmu;
+            data.opts.bdmv = bdmv;
+            vectorized = crg_eval_uv2z(data, puv);
+            scalar = zeros(size(vectorized));
+            for k = 1:size(puv, 1)
+                scalar(k) = crg_eval_uv2z(data, puv(k, :));
+            end
+            verifyEqual(testCase, isnan(vectorized), isnan(scalar));
+            finiteMask = isfinite(vectorized) & isfinite(scalar);
+            verifyEqual(testCase, vectorized(finiteMask), scalar(finiteMask), AbsTol=1e-10);
+        end
+    end
+end
+end
+
 function testMetricsSuiteRuns(testCase)
 results = opencrg_modernization_metrics();
 verifyGreaterThan(testCase, height(results), 3);
