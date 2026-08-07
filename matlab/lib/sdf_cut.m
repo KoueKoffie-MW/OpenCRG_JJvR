@@ -36,35 +36,53 @@ function [sdf_block, sdf_out] = sdf_cut(sdf_in, blockname)
 %
 % *****************************************************************
 
-sdf_block{1} = '';
-sdf_out{1} = '';
-
 state = 0;
 
 hc = strcat('$', blockname);
+lineCount = numel(sdf_in);
+sdf_block = cell(1, lineCount);
+sdf_out = cell(1, lineCount);
+blockCount = 0;
+outCount = 0;
 
-for i = 1:length(sdf_in)
+for i = 1:lineCount
     switch state
         case 0 % outside of $BLOCKNAME
-            if strcmpi(strtok(sdf_in{i}, ' !'), hc)
+            if strcmpi(firstSdfToken(sdf_in{i}), hc)
                 state = 1; % begin of $BLOCKNAME detected
             else
-                sdf_out{end+1} = sdf_in{i}; %#ok<AGROW>
+                outCount = outCount + 1;
+                sdf_out{outCount} = sdf_in{i};
             end
         case 1 % inside of $BLOCKNAME
             if strncmp(sdf_in{i}, '$', 1)
                 if strncmp(sdf_in{i}, '$$', 2)
-                    sdf_block{end+1} = sdf_in{i}(2:end); %#ok<AGROW>
+                    blockCount = blockCount + 1;
+                    sdf_block{blockCount} = sdf_in{i}(2:end);
                 else
                     state = 2; % end of $BLOCKNAME detected
                 end
             else
-                sdf_block{end+1} = sdf_in{i}; %#ok<AGROW>
+                blockCount = blockCount + 1;
+                sdf_block{blockCount} = sdf_in{i};
             end
         case 2 % after end of $BLOCKNAME
-            sdf_out{end+1} = sdf_in{i}; %#ok<AGROW>
+            outCount = outCount + 1;
+            sdf_out{outCount} = sdf_in{i};
     end
 end
 
-sdf_block(1) = [];
-sdf_out(1) = [];
+sdf_block = sdf_block(1:blockCount);
+sdf_out = sdf_out(1:outCount);
+
+end
+
+function token = firstSdfToken(line)
+line = strtrim(line);
+delimiter = find(line == ' ' | line == '!', 1);
+if isempty(delimiter)
+    token = line;
+else
+    token = line(1:delimiter-1);
+end
+end

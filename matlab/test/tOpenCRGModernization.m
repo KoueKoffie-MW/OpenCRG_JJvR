@@ -38,6 +38,16 @@ classdef tOpenCRGModernization < matlab.unittest.TestCase
             testCase.verifyEqual(selected.kd_dat, allChannels.kd_dat(:, channelIndex));
         end
 
+        function sdfCutPreservesBlockAndRemainder(testCase)
+            source = {'keep before', '  $TARGET ! inline comment', 'value line', ...
+                '$$escaped marker', '$END', 'keep after'};
+
+            [block, remainder] = sdf_cut(source, 'target');
+
+            testCase.verifyEqual(block, {'value line', '$escaped marker'});
+            testCase.verifyEqual(remainder, {'keep before', 'keep after'});
+        end
+
         function longRecordsAreTruncatedOnWrite(testCase)
             fixture = testCase.applyFixture(matlab.unittest.fixtures.TemporaryFolderFixture());
             file = fullfile(fixture.Folder, "long-record.crg");
