@@ -241,6 +241,19 @@ classdef tOpenCRGModernization < matlab.unittest.TestCase
             testCase.verifyEqual(columnOutput.', rowOutput);
         end
 
+        function crgCheckComputesNanEdgeBounds(testCase)
+            data = crg_read(fullfile(testCase.CrgTextFolder, "handmade_curved.crg"));
+            data.z(:, 1) = NaN;
+            data.z(:, end) = NaN;
+            data = rmfield(data, 'ok');
+
+            checked = crg_check(data);
+
+            testCase.verifyTrue(isfield(checked, "ok"));
+            testCase.verifyEqual(checked.ir, 2*ones(1, size(data.z, 1)));
+            testCase.verifyEqual(checked.il, (size(data.z, 2)-1)*ones(1, size(data.z, 1)));
+        end
+
         function metricsSuiteRuns(testCase)
             results = opencrg_modernization_metrics();
 

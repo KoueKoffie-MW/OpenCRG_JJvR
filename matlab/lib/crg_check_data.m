@@ -544,12 +544,14 @@ if isfield(data, 'p') && length(data.p)==nu-1 % variable heading (curved refline
     % location
     data.rx = zeros(1, nu);
     data.ry = zeros(1, nu);
+    cosP = cos(double(data.p));
+    sinP = sin(double(data.p));
     if isfield(data.head, 'xend') % backward / forward integration
         data.rx(nu) = data.head.xend;
         data.ry(nu) = data.head.yend;
         for i = nu-1:-1:1 % backward
-            data.rx(i) = data.rx(i+1) - data.head.uinc*cos(double(data.p(i)));
-            data.ry(i) = data.ry(i+1) - data.head.uinc*sin(double(data.p(i)));
+            data.rx(i) = data.rx(i+1) - data.head.uinc*cosP(i);
+            data.ry(i) = data.ry(i+1) - data.head.uinc*sinP(i);
         end
         err = sqrt((data.rx(1)-data.head.xbeg)^2 + (data.ry(1)-data.head.ybeg)^2);
         if err > max((data.head.uend-data.head.ubeg)*crgeps, crgtol)
@@ -559,10 +561,10 @@ if isfield(data, 'p') && length(data.p)==nu-1 % variable heading (curved refline
         data.rx(1) = data.head.xbeg;
         data.ry(1) = data.head.ybeg;
         for i = 1:1:(nu-2) % forward with weighted interpolation
-            data.rx(i+1) = ((nu-i-1)*(data.rx(i) + data.head.uinc*cos(double(data.p(i)))) + i*data.rx(i+1))/(nu-1);
-            data.ry(i+1) = ((nu-i-1)*(data.ry(i) + data.head.uinc*sin(double(data.p(i)))) + i*data.ry(i+1))/(nu-1);
+            data.rx(i+1) = ((nu-i-1)*(data.rx(i) + data.head.uinc*cosP(i)) + i*data.rx(i+1))/(nu-1);
+            data.ry(i+1) = ((nu-i-1)*(data.ry(i) + data.head.uinc*sinP(i)) + i*data.ry(i+1))/(nu-1);
         end
-        if max((diff(data.rx)-cos(data.p)*data.head.uinc).^2 + (diff(data.ry)-sin(data.p)*data.head.uinc).^2) > crgtol^2
+        if max((diff(data.rx)-cosP*data.head.uinc).^2 + (diff(data.ry)-sinP*data.head.uinc).^2) > crgtol^2
             warning('CRG:checkWarning', 'inconsistent values in DATA.head.xend/xbeg/yend/ybeg/uinc and DATA.p')
             ierr = 1;
         end
@@ -705,21 +707,24 @@ end
 
 %% check NaNs in DATA.z
 
-data.ir = zeros(1, nu);
-data.il = zeros(1, nu);
-for i = 1:nu
-    valid = ~isnan(data.z(i, :));
-    if sum(valid) == 0
-        error('CRG:checkError', 'full NaN cross section in DATA.z(%d,:)', i)
-    end
-    r = find(valid, 1, 'first');
-    l = find(valid, 1, 'last');
-    if sum(valid(r:l)) ~= l-r+1
-        error('CRG:checkError', 'NaN inside valid data of cross section in DATA.z(%d,:)', i)
-    end
-    data.il(i) = l;
-    data.ir(i) = r;
+validZ = ~isnan(data.z);
+validCount = sum(validZ, 2);
+firstFullNaN = find(validCount == 0, 1);
+if ~isempty(firstFullNaN)
+    error('CRG:checkError', 'full NaN cross section in DATA.z(%d,:)', firstFullNaN)
 end
+
+[~, firstValid] = max(validZ, [], 2);
+[~, reverseLastValid] = max(validZ(:, end:-1:1), [], 2);
+lastValid = nv - reverseLastValid + 1;
+
+firstInternalNaN = find(validCount ~= lastValid-firstValid+1, 1);
+if ~isempty(firstInternalNaN)
+    error('CRG:checkError', 'NaN inside valid data of cross section in DATA.z(%d,:)', firstInternalNaN)
+end
+
+data.ir = firstValid.';
+data.il = lastValid.';
 
 %% prepare history
 
