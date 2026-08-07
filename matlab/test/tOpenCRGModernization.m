@@ -60,6 +60,14 @@ classdef tOpenCRGModernization < matlab.unittest.TestCase
             testCase.verifyGreaterThanOrEqual(size(data.z, 2), 2);
         end
 
+        function numberedLongSectionsReadUniformLateralGrid(testCase)
+            data = crg_read(fullfile(testCase.CrgBinaryFolder, "belgian_block.crg"));
+            expectedColumnCount = round((data.head.vmax-data.head.vmin)/data.head.vinc) + 1;
+
+            testCase.verifyEqual(size(data.z, 2), expectedColumnCount);
+            testCase.verifyEqual(double(data.v), data.head.vmax, AbsTol=1e-6);
+        end
+
         function evaluationKernelsPreserveShapes(testCase)
             data = crg_read(fullfile(testCase.CrgBinaryFolder, "belgian_block.crg"));
             uValues = linspace(data.head.ubeg, data.head.uend, 25);

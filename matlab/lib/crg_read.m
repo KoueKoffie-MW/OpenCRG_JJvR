@@ -473,7 +473,8 @@ for i=1:length(ipl.kd_def)
             hd = str2double(ht(21:end));
         else % long section defined by number
             nnumv = nnumv + 1;
-            hd = str2double(ht);
+            hd = sscanf(ht(14:end), '%f', 1);
+            if isempty(hd), hd = NaN; end
         end
         if strcmp(hunit, 'm') % register only with valid unit, report errors below
             nchanv = nchanv + 1;
