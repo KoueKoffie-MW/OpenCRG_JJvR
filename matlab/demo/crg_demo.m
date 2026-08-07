@@ -37,7 +37,7 @@
 
 % DEFAULT SETTINGS
 % clear environment
-clear all;
+clearvars;
 close all
 % display results
 dispRes = 0;

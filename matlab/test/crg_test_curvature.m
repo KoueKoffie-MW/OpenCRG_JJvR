@@ -34,7 +34,7 @@
 % DEFAULT SETTINGS
 % clear environment
 close all;
-clear all;
+clearvars;
 clc;
 
 % read and show crg data

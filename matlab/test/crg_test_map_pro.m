@@ -40,7 +40,7 @@
 % DEFAULT SETTINGS
 % clear environment
 close all;
-clear all;
+clearvars;
 clc;
 
 % read crg data (with correct wgs84 and UTM coordinates)

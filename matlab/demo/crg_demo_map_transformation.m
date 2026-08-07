@@ -36,7 +36,7 @@
 
 % DEFAULT SETTINGS
 % clear environment
-clear all;
+clearvars;
 close all;
 clc;
 

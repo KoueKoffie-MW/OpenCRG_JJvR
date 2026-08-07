@@ -32,7 +32,7 @@
 
 % DEFAULT SETTINGS
 % clear environment
-clear all;
+clearvars;
 close all;
 
 % Set plot area

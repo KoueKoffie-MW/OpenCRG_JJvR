@@ -32,7 +32,7 @@
 
 % DEFAULT SETTINGS
 % clear environment
-clear all;
+clearvars;
 close all;
 
 err_cnt  = 0;

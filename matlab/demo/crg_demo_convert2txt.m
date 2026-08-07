@@ -23,7 +23,7 @@
 
 %% clear environment
 
-clear all
+clearvars;
 close all
 
 %% load demo road

@@ -69,7 +69,7 @@ function [v] = crg_check_uv_descript(uv_descript, posmode)
 % *****************************************************************
 
 %% check arguments and initialize
-error(nargchk(2, 2, nargin));
+narginchk(2, 2);
 error_cnt   = 0;
 ignore_cnt  = 0;
 profile_cnt = 0;

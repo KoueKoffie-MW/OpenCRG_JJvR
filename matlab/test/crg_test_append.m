@@ -46,7 +46,7 @@
 
 % DEFAULT SETTINGS
 % clear environment
-clear all;
+clearvars;
 close all;
 
 %% Test1 ( defined by z matrix and scalar u and v specs )

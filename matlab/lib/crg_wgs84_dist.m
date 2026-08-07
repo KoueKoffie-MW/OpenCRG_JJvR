@@ -110,7 +110,7 @@ function [s_out, faz_out, baz_out] = wgs84dist(varargin)
 %-------------------------------------------------------------------------------
 % check input arguments
 %-------------------------------------------------------------------------------
-  error(nargchk(4, 6, nargin));
+  narginchk(4, 6);
 
 %-------------------------------------------------------------------------------
 % check for input errors (e.g., inputs have incorrect number of rows or columns)

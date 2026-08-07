@@ -40,7 +40,7 @@ function [data] = crg_perform2surface(data, uv_surf, oper)
 
 %% check number of arguments
 
-error(nargchk(3, 3, nargin));
+narginchk(3, 3);
 
 %% check input data struct
 
@@ -217,7 +217,7 @@ function [ ibeg, iend ] = rangeind(a, afct)
 % Reference:
 %
 
-error(nargchk(2, 2, nargin));
+narginchk(2, 2);
 error(nargoutchk(0, 2, nargout));
 
 if ~isa(afct,'function_handle')

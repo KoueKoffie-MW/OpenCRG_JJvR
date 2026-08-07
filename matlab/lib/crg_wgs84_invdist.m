@@ -111,7 +111,7 @@ function [lat2_out, lon2_out, baz_out] = wgs84invdist(varargin)
 %-------------------------------------------------------------------------------
 % check input arguments
 %-------------------------------------------------------------------------------
-  error(nargchk(4, 6, nargin));
+  narginchk(4, 6);
 
 %-------------------------------------------------------------------------------
 % check for input errors (e.g., inputs have incorrect number of rows or columns)

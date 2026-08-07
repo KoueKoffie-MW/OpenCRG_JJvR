@@ -32,7 +32,7 @@
 
 % DEFAULT SETTINGS
 % clear environment
-clear all;
+clearvars;
 close all;
 % range
 u = -1:0.01:11;
