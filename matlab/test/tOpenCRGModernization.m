@@ -362,6 +362,61 @@ classdef tOpenCRGModernization < matlab.unittest.TestCase
             end
         end
 
+        function crgWriteSimscapeGridProducesVariables(testCase)
+            fixture = testCase.applyFixture(matlab.unittest.fixtures.TemporaryFolderFixture());
+            sourceFile = fullfile(testCase.CrgTextFolder, "handmade_curved.crg");
+            matFile = fullfile(fixture.Folder, "handmade_curved_SimscapeGrid.mat");
+
+            [x, y, z] = crg_write_simscape_grid(sourceFile, matFile, ...
+                GridResolution=1, NumLongitudinalSamples=12, NumLateralSamples=7);
+            loadedGrid = load(matFile);
+
+            testCase.verifyTrue(isfile(matFile));
+            testCase.verifyGreaterThan(numel(x), 1);
+            testCase.verifyGreaterThan(numel(y), 1);
+            testCase.verifySize(z, [numel(x) numel(y)]);
+            testCase.verifyTrue(all(diff(x) > 0));
+            testCase.verifyTrue(all(diff(y) > 0));
+            testCase.verifyTrue(all(isfinite(z), "all"));
+            testCase.verifyEqual(loadedGrid.x, x);
+            testCase.verifyEqual(loadedGrid.y, y);
+            testCase.verifyEqual(loadedGrid.z, z);
+        end
+
+        function crgWriteSimscapeGridSupportsSingleOutput(testCase)
+            data = crg_read(fullfile(testCase.CrgTextFolder, "handmade_curved.crg"));
+
+            [x, y, z] = crg_write_simscape_grid(data, Write=false, ...
+                GridResolution=2, NumLongitudinalSamples=10, NumLateralSamples=5, OutputClass="single");
+
+            testCase.verifyClass(x, "single");
+            testCase.verifyClass(y, "single");
+            testCase.verifyClass(z, "single");
+            testCase.verifySize(z, [numel(x) numel(y)]);
+        end
+
+        function crgWriteSimscapeGridFeedsGridSurfaceMask(testCase)
+            testCase.assumeTrue(exist("load_system", "file") == 2 && ~isempty(which("sm_lib")), ...
+                "Simscape Multibody library is unavailable.");
+            data = crg_read(fullfile(testCase.CrgTextFolder, "handmade_curved.crg"));
+            [x, y, z] = crg_write_simscape_grid(data, Write=false, ...
+                GridResolution=2, NumLongitudinalSamples=8, NumLateralSamples=5);
+            modelName = "opencrgGridSurface" + string(randi(1e9));
+            new_system(modelName);
+            testCase.addTeardown(@() close_system(modelName, 0));
+            load_system("sm_lib");
+            blockPath = modelName + "/Grid Surface";
+            add_block("sm_lib/Curves and Surfaces/Grid Surface", blockPath);
+            modelWorkspace = get_param(modelName, "ModelWorkspace");
+            assignin(modelWorkspace, "gridX", x);
+            assignin(modelWorkspace, "gridY", y);
+            assignin(modelWorkspace, "gridZ", z);
+
+            set_param(blockPath, XGridVector="gridX", YGridVector="gridY", ZHeights="gridZ");
+
+            set_param(modelName, "SimulationCommand", "Update");
+        end
+
         function metricsSuiteRuns(testCase)
             results = opencrg_modernization_metrics();
 
