@@ -10,8 +10,14 @@ end
 demoFolder = fileparts(mfilename('fullpath'));
 repositoryFolder = fileparts(fileparts(demoFolder));
 crgFile = fullfile(repositoryFolder, 'crg-txt', 'handmade_curved.crg');
-rrhdFile = fullfile(tempdir, 'handmade_curved.rrhd');
+singleLaneFile = fullfile(tempdir, 'handmade_curved_single_lane.rrhd');
+lateralStripsFile = fullfile(tempdir, 'handmade_curved_lateral_strips.rrhd');
 
-rrMap = crg_write_rrhd(crgFile, rrhdFile, NumSamples=100);
+singleLaneMap = crg_write_rrhd(crgFile, singleLaneFile, NumSamples=100);
 fprintf('Wrote %s with %d lane and %d boundaries.\n', ...
-    rrhdFile, numel(rrMap.Lanes), numel(rrMap.LaneBoundaries));
+    singleLaneFile, numel(singleLaneMap.Lanes), numel(singleLaneMap.LaneBoundaries));
+
+lateralStripsMap = crg_write_rrhd(crgFile, lateralStripsFile, ...
+    Mode="LateralStrips", NumSamples=100);
+fprintf('Wrote %s with %d lanes and %d boundaries.\n', ...
+    lateralStripsFile, numel(lateralStripsMap.Lanes), numel(lateralStripsMap.LaneBoundaries));

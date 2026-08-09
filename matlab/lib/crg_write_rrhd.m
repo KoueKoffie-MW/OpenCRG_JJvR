@@ -1,7 +1,7 @@
 function [rrMap, data, geometry] = crg_write_rrhd(source, rrhdFile, options)
 %CRG_WRITE_RRHD Export OpenCRG road data as RoadRunner HD Map.
 %   RRMAP = CRG_WRITE_RRHD(SOURCE, RRHDFILE) reads OpenCRG data from SOURCE
-%   and writes a single-lane RoadRunner HD Map file to RRHDFILE.
+%   and writes a RoadRunner HD Map file to RRHDFILE.
 %
 %   [RRMAP, DATA, GEOMETRY] = CRG_WRITE_RRHD(___) also returns the checked
 %   OpenCRG data and the exported lane and boundary geometries.
@@ -9,21 +9,26 @@ function [rrMap, data, geometry] = crg_write_rrhd(source, rrhdFile, options)
 %   SOURCE can be a CRG file name or a DATA struct as defined in CRG_INTRO.
 %
 %   Name-value options:
-%       NumSamples       Number of longitudinal samples. Default uses CRG rows.
-%       LaneVLimits      [right left] lateral offsets. Default uses CRG limits.
-%       CenterV          Lane-center lateral offset. Default is zero if inside.
-%       GeoReference     [latitude longitude] in degrees.
-%       AddEdgeMarkings  Add solid white markings to both lane boundaries.
-%       Write            Write RRHDFILE. Set false to build RRMAP only.
+%       Mode                   "SingleLane" or "LateralStrips".
+%       NumSamples             Number of longitudinal samples. Default uses CRG rows.
+%       LaneVLimits            [right left] lateral offsets. Default uses CRG limits.
+%       CenterV                Lane-center lateral offset for "SingleLane".
+%       GeoReference           [latitude longitude] in degrees.
+%       AddEdgeMarkings        Add edge markings where selected marking mode permits.
+%       StripLaneType          Lane type for "LateralStrips" lanes.
+%       StripBoundaryMarkings  "None", "OuterOnly", or "All".
+%       EvalChunkSize          Maximum UV points per evaluation chunk.
+%       Write                  Write RRHDFILE. Set false to build RRMAP only.
 %
 %   Example:
-%       crg_write_rrhd("road.crg", "road.rrhd", NumSamples=250)
+%       crg_write_rrhd("road.crg", "road.rrhd", Mode="LateralStrips")
 %
 %   See also CRG_READ, CRG_EVAL_UV2XY, CRG_EVAL_UV2Z.
 
 arguments
     source
     rrhdFile {mustBeTextScalar} = ""
+    options.Mode (1, 1) string = "SingleLane"
     options.NumSamples (1, 1) double {mustBeInteger, mustBeNonnegative} = 0
     options.LaneVLimits (1, 2) double = [NaN NaN]
     options.CenterV (1, 1) double = NaN
@@ -33,21 +38,37 @@ arguments
     options.RightBoundaryID (1, 1) string = "Right"
     options.TravelDirection (1, 1) string = "Forward"
     options.LaneType (1, 1) string = "Driving"
+    options.StripLaneType (1, 1) string = "Driving"
+    options.StripBoundaryMarkings (1, 1) string = "OuterOnly"
     options.AddEdgeMarkings (1, 1) logical = true
     options.MarkingID (1, 1) string = "SolidWhite"
     options.MarkingAsset (1, 1) string = "Assets/Markings/SolidSingleWhite.rrlms"
+    options.EvalChunkSize (1, 1) double {mustBeInteger, mustBePositive} = 250000
     options.Write (1, 1) logical = true
 end
 
+options = crgRrhdValidateOptions(options);
 [data, sourceFile] = crgRrhdReadSource(source);
 rrhdFile = crgRrhdOutputFile(rrhdFile, sourceFile, options.Write);
-[geometry, data] = crgRrhdGeometry(data, options.NumSamples, options.LaneVLimits, options.CenterV);
+[geometry, data] = crgRrhdGeometry(data, options);
 rrMap = crgRrhdMap(geometry, data, options);
 crgRrhdValidate(rrMap);
 
 if options.Write
     write(rrMap, rrhdFile);
 end
+end
+
+function options = crgRrhdValidateOptions(options)
+options.Mode = string(validatestring(options.Mode, ["SingleLane", "LateralStrips"]));
+options.TravelDirection = string(validatestring(options.TravelDirection, ...
+    ["Forward", "Backward", "Bidirectional", "Undirected"]));
+options.LaneType = string(validatestring(options.LaneType, ...
+    ["Driving", "Shoulder", "Biking", "Border", "Restricted", "Parking", "Curb", "Sidewalk", "CenterTurn"]));
+options.StripLaneType = string(validatestring(options.StripLaneType, ...
+    ["Driving", "Shoulder", "Biking", "Border", "Restricted", "Parking", "Curb", "Sidewalk", "CenterTurn"]));
+options.StripBoundaryMarkings = string(validatestring(options.StripBoundaryMarkings, ...
+    ["None", "OuterOnly", "All"]));
 end
 
 function [data, sourceFile] = crgRrhdReadSource(source)
@@ -89,15 +110,21 @@ if rrhdFile ~= ""
 end
 end
 
-function [geometry, data] = crgRrhdGeometry(data, sampleCount, laneVLimits, centerOffset)
-if sampleCount == 0
-    sampleCount = size(data.z, 1);
+function [geometry, data] = crgRrhdGeometry(data, options)
+switch options.Mode
+    case "SingleLane"
+        [geometry, data] = crgRrhdSingleLaneGeometry(data, options);
+    case "LateralStrips"
+        [geometry, data] = crgRrhdStripGeometry(data, options);
+    otherwise
+        error('CRG:rrhdError', 'Unsupported RRHD export mode: %s', options.Mode)
 end
-if sampleCount < 2
-    error('CRG:rrhdError', 'NumSamples must be at least 2')
 end
 
-lateralLimits = crgRrhdLaneVLimits(data, laneVLimits);
+function [geometry, data] = crgRrhdSingleLaneGeometry(data, options)
+longitudinalPositions = crgRrhdLongitudinalPositions(data, options.NumSamples);
+lateralLimits = crgRrhdLaneVLimits(data, options.LaneVLimits);
+centerOffset = options.CenterV;
 if isnan(centerOffset)
     centerOffset = crgRrhdCenterV(lateralLimits);
 end
@@ -105,28 +132,72 @@ if centerOffset < min(lateralLimits) || centerOffset > max(lateralLimits)
     error('CRG:rrhdError', 'CenterV must lie inside LaneVLimits')
 end
 
-longitudinalPositions = linspace(data.head.ubeg, data.head.uend, sampleCount).';
 leftOffset = max(lateralLimits);
 rightOffset = min(lateralLimits);
+[polylines, data] = crgRrhdEvaluatePolylines(data, longitudinalPositions, ...
+    [leftOffset centerOffset rightOffset], options.EvalChunkSize);
 
-leftUv = [longitudinalPositions repmat(leftOffset, sampleCount, 1)];
-centerUv = [longitudinalPositions repmat(centerOffset, sampleCount, 1)];
-rightUv = [longitudinalPositions repmat(rightOffset, sampleCount, 1)];
-allUv = [leftUv; centerUv; rightUv];
-
-[allXy, data] = crg_eval_uv2xy(data, allUv);
-[allZ, data] = crg_eval_uv2z(data, allUv);
-
-leftRows = 1:sampleCount;
-centerRows = sampleCount + leftRows;
-rightRows = 2*sampleCount + leftRows;
-
-geometry.LeftBoundary = crgRrhdCleanGeometry([allXy(leftRows, :) allZ(leftRows)]);
-geometry.CenterLine = crgRrhdCleanGeometry([allXy(centerRows, :) allZ(centerRows)]);
-geometry.RightBoundary = crgRrhdCleanGeometry([allXy(rightRows, :) allZ(rightRows)]);
+geometry.Mode = "SingleLane";
+geometry.LeftBoundary = polylines{1};
+geometry.CenterLine = polylines{2};
+geometry.RightBoundary = polylines{3};
 geometry.LongitudinalPositions = longitudinalPositions;
 geometry.LaneVLimits = [rightOffset leftOffset];
 geometry.CenterV = centerOffset;
+end
+
+function [geometry, data] = crgRrhdStripGeometry(data, options)
+longitudinalPositions = crgRrhdLongitudinalPositions(data, options.NumSamples);
+lateralPositions = crgRrhdSelectedVGrid(data, options.LaneVLimits);
+centerPositions = (lateralPositions(1:end-1) + lateralPositions(2:end))/2;
+
+[boundaries, data] = crgRrhdEvaluatePolylines(data, longitudinalPositions, ...
+    lateralPositions, options.EvalChunkSize);
+[centerLines, data] = crgRrhdEvaluatePolylines(data, longitudinalPositions, ...
+    centerPositions, options.EvalChunkSize);
+
+geometry.Mode = "LateralStrips";
+geometry.Boundaries = boundaries;
+geometry.CenterLines = centerLines;
+geometry.LongitudinalPositions = longitudinalPositions;
+geometry.LateralPositions = lateralPositions;
+geometry.LaneVLimits = [lateralPositions(1) lateralPositions(end)];
+geometry.CenterV = centerPositions;
+end
+
+function longitudinalPositions = crgRrhdLongitudinalPositions(data, sampleCount)
+if sampleCount == 0
+    sampleCount = size(data.z, 1);
+end
+if sampleCount < 2
+    error('CRG:rrhdError', 'NumSamples must be at least 2')
+end
+longitudinalPositions = linspace(data.head.ubeg, data.head.uend, sampleCount).';
+end
+
+function lateralPositions = crgRrhdSelectedVGrid(data, laneVLimits)
+lateralPositions = crgRrhdFullVGrid(data);
+lateralLimits = crgRrhdLaneVLimits(data, laneVLimits);
+selected = lateralPositions >= min(lateralLimits) & lateralPositions <= max(lateralLimits);
+lateralPositions = lateralPositions(selected);
+if numel(lateralPositions) < 2
+    error('CRG:rrhdError', 'LateralStrips mode requires at least two CRG lateral grid columns')
+end
+end
+
+function lateralPositions = crgRrhdFullVGrid(data)
+columnCount = size(data.z, 2);
+if isfield(data.head, 'vinc') && data.head.vinc > 0
+    lateralPositions = linspace(data.head.vmin, data.head.vmax, columnCount);
+elseif isfield(data, 'v') && isscalar(data.v)
+    lateralPositions = linspace(-double(data.v), double(data.v), columnCount);
+elseif isfield(data, 'v') && numel(data.v) == 2
+    lateralPositions = linspace(double(data.v(1)), double(data.v(2)), columnCount);
+elseif isfield(data, 'v') && numel(data.v) == columnCount
+    lateralPositions = double(reshape(data.v, 1, []));
+else
+    error('CRG:rrhdError', 'Unable to determine OpenCRG lateral grid positions')
+end
 end
 
 function lateralLimits = crgRrhdLaneVLimits(data, laneVLimits)
@@ -152,6 +223,26 @@ else
 end
 end
 
+function [polylines, data] = crgRrhdEvaluatePolylines(data, longitudinalPositions, lateralPositions, chunkSize)
+rowCount = numel(longitudinalPositions);
+columnCount = numel(lateralPositions);
+chunkColumns = max(1, floor(chunkSize/rowCount));
+polylines = cell(1, columnCount);
+
+for startColumn = 1:chunkColumns:columnCount
+    endColumn = min(columnCount, startColumn + chunkColumns - 1);
+    columnRange = startColumn:endColumn;
+    [uGrid, vGrid] = ndgrid(longitudinalPositions, lateralPositions(columnRange));
+    uvPoints = [uGrid(:) vGrid(:)];
+    [xyPoints, data] = crg_eval_uv2xy(data, uvPoints);
+    [zPoints, data] = crg_eval_uv2z(data, uvPoints);
+    points = reshape([xyPoints zPoints], rowCount, numel(columnRange), 3);
+    for localColumn = 1:numel(columnRange)
+        polylines{columnRange(localColumn)} = crgRrhdCleanGeometry(squeeze(points(:, localColumn, :)));
+    end
+end
+end
+
 function geometry = crgRrhdCleanGeometry(geometry)
 finiteRows = all(isfinite(geometry), 2);
 geometry = geometry(finiteRows, :);
@@ -168,6 +259,22 @@ end
 function rrMap = crgRrhdMap(geometry, data, options)
 rrMap = roadrunnerHDMap;
 
+switch geometry.Mode
+    case "SingleLane"
+        rrMap = crgRrhdSingleLaneMap(rrMap, geometry, options);
+    case "LateralStrips"
+        rrMap = crgRrhdStripMap(rrMap, geometry, options);
+    otherwise
+        error('CRG:rrhdError', 'Unsupported RRHD geometry mode: %s', geometry.Mode)
+end
+
+geoReference = crgRrhdGeoReference(data, options.GeoReference);
+if ~isempty(geoReference)
+    rrMap.GeoReference = geoReference;
+end
+end
+
+function rrMap = crgRrhdSingleLaneMap(rrMap, geometry, options)
 leftBoundary = roadrunner.hdmap.LaneBoundary;
 leftBoundary.ID = options.LeftBoundaryID;
 leftBoundary.Geometry = geometry.LeftBoundary;
@@ -195,10 +302,56 @@ laneBoundaries(1, 1) = leftBoundary;
 laneBoundaries(2, 1) = rightBoundary;
 rrMap.LaneBoundaries = laneBoundaries;
 rrMap.Lanes = lane;
+end
 
-geoReference = crgRrhdGeoReference(data, options.GeoReference);
-if ~isempty(geoReference)
-    rrMap.GeoReference = geoReference;
+function rrMap = crgRrhdStripMap(rrMap, geometry, options)
+boundaryCount = numel(geometry.Boundaries);
+laneCount = numel(geometry.CenterLines);
+boundaryIds = "StripBoundary_" + compose("%03d", 1:boundaryCount);
+laneIds = "StripLane_" + compose("%03d", 1:laneCount);
+laneBoundaries(boundaryCount, 1) = roadrunner.hdmap.LaneBoundary;
+lanes(laneCount, 1) = roadrunner.hdmap.Lane;
+isClosed = crgRrhdIsClosed(geometry.CenterLines{1});
+
+for boundaryIndex = 1:boundaryCount
+    laneBoundaries(boundaryIndex).ID = boundaryIds(boundaryIndex);
+    laneBoundaries(boundaryIndex).Geometry = geometry.Boundaries{boundaryIndex};
+end
+
+markedBoundaryIndices = crgRrhdMarkedBoundaryIndices(boundaryCount, options, isClosed);
+if ~isempty(markedBoundaryIndices)
+    rrMap.LaneMarkings = crgRrhdLaneMarking(options.MarkingID, options.MarkingAsset);
+    for boundaryIndex = markedBoundaryIndices
+        laneBoundaries(boundaryIndex).ParametricAttributes = crgRrhdMarkingAttribution(options.MarkingID);
+    end
+end
+
+for laneIndex = 1:laneCount
+    lanes(laneIndex).ID = laneIds(laneIndex);
+    lanes(laneIndex).Geometry = geometry.CenterLines{laneIndex};
+    lanes(laneIndex).TravelDirection = options.TravelDirection;
+    lanes(laneIndex).LaneType = options.StripLaneType;
+    lanes(laneIndex).LeftLaneBoundary = crgRrhdAlignedReference(boundaryIds(laneIndex + 1));
+    lanes(laneIndex).RightLaneBoundary = crgRrhdAlignedReference(boundaryIds(laneIndex));
+end
+
+rrMap.LaneBoundaries = laneBoundaries;
+rrMap.Lanes = lanes;
+end
+
+function markedBoundaryIndices = crgRrhdMarkedBoundaryIndices(boundaryCount, options, isClosed)
+if ~options.AddEdgeMarkings || isClosed || options.StripBoundaryMarkings == "None"
+    markedBoundaryIndices = zeros(1, 0);
+    return
+end
+
+switch options.StripBoundaryMarkings
+    case "OuterOnly"
+        markedBoundaryIndices = unique([1 boundaryCount]);
+    case "All"
+        markedBoundaryIndices = 1:boundaryCount;
+    otherwise
+        markedBoundaryIndices = zeros(1, 0);
 end
 end
 
@@ -250,28 +403,37 @@ isClosed = closingDistance <= max(1e-6, 1e-9*roadLength);
 end
 
 function crgRrhdValidate(rrMap)
-if numel(rrMap.Lanes) ~= 1
-    error('CRG:rrhdError', 'RRHD export currently supports exactly one lane')
+if numel(rrMap.Lanes) < 1
+    error('CRG:rrhdError', 'RRHD export requires at least one lane')
 end
-if numel(rrMap.LaneBoundaries) ~= 2
-    error('CRG:rrhdError', 'RRHD export requires exactly two lane boundaries')
+if numel(rrMap.LaneBoundaries) < 2
+    error('CRG:rrhdError', 'RRHD export requires at least two lane boundaries')
 end
 
-lane = rrMap.Lanes(1);
-crgRrhdValidateGeometry(lane.Geometry, "lane");
+for laneIndex = 1:numel(rrMap.Lanes)
+    crgRrhdValidateGeometry(rrMap.Lanes(laneIndex).Geometry, "lane");
+end
 for boundaryIndex = 1:numel(rrMap.LaneBoundaries)
     crgRrhdValidateGeometry(rrMap.LaneBoundaries(boundaryIndex).Geometry, "lane boundary");
 end
 
 boundaryIds = string({rrMap.LaneBoundaries.ID});
-leftId = string(lane.LeftLaneBoundary.Reference.ID);
-rightId = string(lane.RightLaneBoundary.Reference.ID);
-if ~any(boundaryIds == leftId) || ~any(boundaryIds == rightId)
-    error('CRG:rrhdError', 'Lane boundary references must resolve to exported boundaries')
+for laneIndex = 1:numel(rrMap.Lanes)
+    lane = rrMap.Lanes(laneIndex);
+    leftIndex = crgRrhdBoundaryIndex(boundaryIds, string(lane.LeftLaneBoundary.Reference.ID));
+    rightIndex = crgRrhdBoundaryIndex(boundaryIds, string(lane.RightLaneBoundary.Reference.ID));
+    crgRrhdValidateLeftBoundary(lane.Geometry, rrMap.LaneBoundaries(leftIndex).Geometry);
+    if leftIndex == rightIndex
+        error('CRG:rrhdError', 'Lane %s references the same left and right boundary', lane.ID)
+    end
+end
 end
 
-leftBoundary = rrMap.LaneBoundaries(find(boundaryIds == leftId, 1)).Geometry;
-crgRrhdValidateLeftBoundary(lane.Geometry, leftBoundary);
+function boundaryIndex = crgRrhdBoundaryIndex(boundaryIds, boundaryId)
+boundaryIndex = find(boundaryIds == boundaryId, 1);
+if isempty(boundaryIndex)
+    error('CRG:rrhdError', 'Lane boundary reference %s does not resolve to an exported boundary', boundaryId)
+end
 end
 
 function crgRrhdValidateGeometry(geometry, label)

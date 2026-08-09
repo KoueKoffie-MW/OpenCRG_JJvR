@@ -318,6 +318,50 @@ classdef tOpenCRGModernization < matlab.unittest.TestCase
             testCase.verifySize(geometry.RightBoundary, [8 3]);
         end
 
+        function crgWriteRRHDExportsLateralStrips(testCase)
+            testCase.assumeTrue(exist("roadrunnerHDMap", "file") == 2, ...
+                "RoadRunner HD Map API is unavailable.");
+            fixture = testCase.applyFixture(matlab.unittest.fixtures.TemporaryFolderFixture());
+            sourceFile = fullfile(testCase.CrgTextFolder, "handmade_curved.crg");
+            rrhdFile = fullfile(fixture.Folder, "handmade_curved_strips.rrhd");
+
+            [rrMap, data, geometry] = crg_write_rrhd(sourceFile, rrhdFile, ...
+                Mode="LateralStrips", NumSamples=12, GeoReference=[51 9]);
+            readBackMap = roadrunnerHDMap;
+            read(readBackMap, rrhdFile);
+            lateralColumnCount = size(data.z, 2);
+
+            testCase.verifyTrue(isfile(rrhdFile));
+            testCase.verifyEqual(geometry.Mode, "LateralStrips");
+            testCase.verifyNumElements(rrMap.Lanes, lateralColumnCount-1);
+            testCase.verifyNumElements(rrMap.LaneBoundaries, lateralColumnCount);
+            testCase.verifyNumElements(readBackMap.Lanes, lateralColumnCount-1);
+            testCase.verifyNumElements(readBackMap.LaneBoundaries, lateralColumnCount);
+            testCase.verifySize(rrMap.Lanes(1).Geometry, [12 3]);
+            testCase.verifySize(rrMap.LaneBoundaries(1).Geometry, [12 3]);
+            testCase.verifyNotEmpty(rrMap.LaneBoundaries(1).ParametricAttributes);
+            testCase.verifyNotEmpty(rrMap.LaneBoundaries(end).ParametricAttributes);
+            if lateralColumnCount > 2
+                testCase.verifyEmpty(rrMap.LaneBoundaries(2).ParametricAttributes);
+            end
+        end
+
+        function crgWriteRRHDSupportsStripMarkingModes(testCase)
+            testCase.assumeTrue(exist("roadrunnerHDMap", "file") == 2, ...
+                "RoadRunner HD Map API is unavailable.");
+            data = crg_read(fullfile(testCase.CrgTextFolder, "handmade_curved.crg"));
+
+            [rrMap, ~, geometry] = crg_write_rrhd(data, Write=false, ...
+                Mode="LateralStrips", NumSamples=8, StripBoundaryMarkings="None", StripLaneType="Border");
+
+            testCase.verifyEqual(geometry.Mode, "LateralStrips");
+            testCase.verifyEmpty(rrMap.LaneMarkings);
+            testCase.verifyEqual(string({rrMap.Lanes.LaneType}), repmat("Border", 1, numel(rrMap.Lanes)));
+            for boundaryIndex = 1:numel(rrMap.LaneBoundaries)
+                testCase.verifyEmpty(rrMap.LaneBoundaries(boundaryIndex).ParametricAttributes);
+            end
+        end
+
         function metricsSuiteRuns(testCase)
             results = opencrg_modernization_metrics();
 
