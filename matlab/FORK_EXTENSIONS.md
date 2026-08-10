@@ -8,6 +8,7 @@ This fork keeps the upstream ASAM OpenCRG layout and adds MATLAB-focused moderni
 - `crg_write_rrhd` for RoadRunner HD Map (`.rrhd`) export.
 - `crg_write_rrhd(..., Mode="LateralStrips")` for higher-fidelity CRG surface representation using many thin RRHD lanes.
 - `crg_write_simscape_grid` for Simscape Multibody Grid Surface variables.
+- `crg_export_lookup` for Simulink-compatible lookup-table variables.
 - Regression and metrics coverage in `matlab/test/tOpenCRGModernization.m` and `matlab/test/opencrg_modernization_metrics.m`.
 
 ## Setup
@@ -93,6 +94,45 @@ Run the demo:
 run(fullfile(repo, "matlab", "demo", "crg_demo_write_simscape_grid.m"));
 ```
 
+## Lookup-Table Export
+
+Export CRG data as lookup-table breakpoints and table data:
+
+```matlab
+lookupFile = fullfile(tempdir, "handmade_curved_Lookup.mat");
+
+lookup = crg_export_lookup(crgFile, lookupFile, Channel="Elevation");
+```
+
+The saved MAT-file contains:
+
+- `u`: longitudinal breakpoints in meters.
+- `v`: lateral breakpoints in meters.
+- `tableData`: table values sized `[numel(u) numel(v)]`.
+- `lookup`: metadata struct with units and source information.
+- `simulinkLookupTable`: `Simulink.LookupTable` object when Simulink is available.
+
+This format is useful for Simulink lookup blocks, calibration data, controller logic, tire models, and road-property maps. The exporter can also read CRG files whose long-section channels are not elevation data. For friction coefficient data stored with unit `1`, use:
+
+```matlab
+muLookup = crg_export_lookup("friction_map.crg", ...
+    Channel="Friction", ...
+    ChannelUnit="1");
+```
+
+Useful lookup options:
+
+- `Channel`: label such as `"Elevation"` or `"Friction"`.
+- `ChannelUnit`: CRG long-section unit to select; use `"m"` for elevation or `"1"` for friction coefficient.
+- `OutputClass`: `"double"` default or `"single"`.
+- `CreateSimulinkLookupTable`: create a `Simulink.LookupTable` object.
+
+Run the demo:
+
+```matlab
+run(fullfile(repo, "matlab", "demo", "crg_demo_export_lookup.m"));
+```
+
 ## Metrics And Validation
 
 Collect modernization metrics:
@@ -102,7 +142,7 @@ results = opencrg_modernization_metrics();
 disp(results);
 ```
 
-The metrics include Code Analyzer issue counts, representative read/evaluation timings, RRHD object creation timings, and Simscape Grid Surface variable creation timing.
+The metrics include Code Analyzer issue counts, representative read/evaluation timings, RRHD object creation timings, Simscape Grid Surface variable creation timing, and lookup export timing.
 
 Run the MATLAB modernization regression suite:
 
@@ -119,5 +159,6 @@ Current representative metrics show:
 - `crg_eval_uv2z.100k`: about `0.002 s`
 - RRHD map-only export: low milliseconds for representative samples
 - Simscape Grid Surface variable creation: low milliseconds for representative samples
+- Lookup table struct creation: low milliseconds for representative samples
 
 Timings are machine- and release-dependent; use `opencrg_modernization_metrics` for the source of truth on your system.

@@ -417,6 +417,59 @@ classdef tOpenCRGModernization < matlab.unittest.TestCase
             set_param(modelName, "SimulationCommand", "Update");
         end
 
+        function crgExportLookupWritesElevationTable(testCase)
+            fixture = testCase.applyFixture(matlab.unittest.fixtures.TemporaryFolderFixture());
+            sourceFile = fullfile(testCase.CrgTextFolder, "handmade_curved.crg");
+            matFile = fullfile(fixture.Folder, "handmade_curved_Lookup.mat");
+
+            [lookup, data] = crg_export_lookup(sourceFile, matFile, ...
+                Channel="Elevation", CreateSimulinkLookupTable=false);
+            loadedLookup = load(matFile);
+
+            testCase.verifyTrue(isfile(matFile));
+            testCase.verifyEqual(lookup.Channel, "Elevation");
+            testCase.verifyEqual(lookup.TableUnit, "m");
+            testCase.verifyEqual(lookup.Breakpoints1, data.u);
+            testCase.verifyEqual(lookup.Breakpoints2, data.v);
+            testCase.verifyEqual(lookup.Table, data.z);
+            testCase.verifyEqual(loadedLookup.u, lookup.Breakpoints1);
+            testCase.verifyEqual(loadedLookup.v, lookup.Breakpoints2);
+            testCase.verifyEqual(loadedLookup.tableData, lookup.Table);
+            testCase.verifyEqual(loadedLookup.lookup.TableUnit, "m");
+        end
+
+        function crgExportLookupReadsFrictionUnit(testCase)
+            fixture = testCase.applyFixture(matlab.unittest.fixtures.TemporaryFolderFixture());
+            sourceFile = fullfile(testCase.CrgTextFolder, "handmade_curved.crg");
+            frictionFile = fullfile(fixture.Folder, "handmade_friction.crg");
+            lines = readlines(sourceFile, Encoding="ISO-8859-1");
+            longSectionRows = contains(lines, "D:long section");
+            lines(longSectionRows) = regexprep(lines(longSectionRows), ',m(\s*(!.*)?)$', ',1$1');
+            writelines(lines, frictionFile, Encoding="ISO-8859-1");
+
+            lookup = crg_export_lookup(frictionFile, Write=false, ...
+                Channel="Friction", ChannelUnit="1", CreateSimulinkLookupTable=false);
+
+            testCase.verifyEqual(lookup.Channel, "Friction");
+            testCase.verifyEqual(lookup.TableUnit, "1");
+            testCase.verifySize(lookup.Table, [23 7]);
+            testCase.verifyEqual(lookup.Breakpoints2, [-1.5 -1.25 -1 0 1 1.25 1.5]);
+        end
+
+        function crgExportLookupCreatesSimulinkObject(testCase)
+            testCase.assumeTrue(exist("Simulink.LookupTable", "class") == 8, ...
+                "Simulink.LookupTable is unavailable.");
+            data = crg_read(fullfile(testCase.CrgTextFolder, "handmade_curved.crg"));
+
+            lookup = crg_export_lookup(data, Write=false, Channel="Elevation");
+
+            testCase.verifyTrue(isfield(lookup, "SimulinkLookupTable"));
+            testCase.verifyClass(lookup.SimulinkLookupTable, "Simulink.LookupTable");
+            testCase.verifyEqual(lookup.SimulinkLookupTable.Table.Value, lookup.Table);
+            testCase.verifyEqual(lookup.SimulinkLookupTable.Breakpoints(1).Value, lookup.Breakpoints1);
+            testCase.verifyEqual(lookup.SimulinkLookupTable.Breakpoints(2).Value, lookup.Breakpoints2);
+        end
+
         function metricsSuiteRuns(testCase)
             results = opencrg_modernization_metrics();
 

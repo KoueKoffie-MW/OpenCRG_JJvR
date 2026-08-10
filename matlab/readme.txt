@@ -19,9 +19,9 @@ To get an overview on CRG data organization, run the crg_intro command.
 Fork extensions:
 
 This fork also contains MATLAB exporters for RoadRunner HD Map (.rrhd)
-files and Simscape Multibody Grid Surface variables. See
-FORK_EXTENSIONS.md in this folder for usage examples, limitations and
-validation commands.
+files, Simscape Multibody Grid Surface variables and Simulink-compatible
+lookup-table variables. See FORK_EXTENSIONS.md in this folder for usage
+examples, limitations and validation commands.
 
 
 Hint on memory limitations: with 32bit MATLAB available memory is sometimes

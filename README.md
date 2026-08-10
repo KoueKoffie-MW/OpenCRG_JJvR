@@ -17,6 +17,7 @@ This fork adds MATLAB modernization work and MathWorks workflow exporters on top
 - RoadRunner HD Map (`.rrhd`) export from CRG data.
 - High-fidelity lateral-strip RRHD export mode.
 - Simscape Multibody Grid Surface variable export.
+- Simulink-compatible lookup-table export for elevation, friction or custom CRG channels.
 - MATLAB regression and performance metrics for the modernization work.
 
 See [matlab/FORK_EXTENSIONS.md](matlab/FORK_EXTENSIONS.md) for usage examples, limitations, and validation commands.
