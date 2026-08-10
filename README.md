@@ -9,6 +9,17 @@ ASAM OpenCRG defines ASCII and binary file formats with clear-text headers. The 
 Data from ASAM OpenCRG can be included in OpenDRIVE road network descriptions. The dynamic content of driving simulations, such as vehicle maneuvers, can be described with ASAM OpenSCENARIO. The three standards complement each other and cover the static and dynamic content of in-the-loop vehicle simulation applications.
 
 The standard is delivered with software libraries in ANSI-C and MATLAB. The libraries for both languages contain functions for reading CRG files, and for modifying and evaluating the imported data. In addition to that, the MATLAB library contains functions to generate, analyze and visualize the data.
+
+## JJvR fork MATLAB extensions
+
+This fork adds MATLAB modernization work and MathWorks workflow exporters on top of the upstream OpenCRG structure:
+
+- RoadRunner HD Map (`.rrhd`) export from CRG data.
+- High-fidelity lateral-strip RRHD export mode.
+- Simscape Multibody Grid Surface variable export.
+- MATLAB regression and performance metrics for the modernization work.
+
+See [matlab/FORK_EXTENSIONS.md](matlab/FORK_EXTENSIONS.md) for usage examples, limitations, and validation commands.
 ## Contribute
 If you want to contribute in this project, please read the [Contribution guidelines](https://github.com/asam-ev/.github/blob/main/profile/CONTRIBUTING.md).
 ## About ASAM

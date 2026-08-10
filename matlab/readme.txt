@@ -16,6 +16,13 @@ OpenCRG MATLAB functions and tools suite.
 
 To get an overview on CRG data organization, run the crg_intro command.
 
+Fork extensions:
+
+This fork also contains MATLAB exporters for RoadRunner HD Map (.rrhd)
+files and Simscape Multibody Grid Surface variables. See
+FORK_EXTENSIONS.md in this folder for usage examples, limitations and
+validation commands.
+
 
 Hint on memory limitations: with 32bit MATLAB available memory is sometimes
 rather limited, especially on WIN32 systems, see MATLAB help on memory.
