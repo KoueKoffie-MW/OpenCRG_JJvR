@@ -18,6 +18,7 @@ This fork adds MATLAB modernization work and MathWorks workflow exporters on top
 - High-fidelity lateral-strip RRHD export mode.
 - Simscape Multibody Grid Surface variable export.
 - Simulink-compatible lookup-table export for elevation, friction or custom CRG channels.
+- C API backed scalar Simulink runtime for streaming `x,y` road queries.
 - MATLAB regression and performance metrics for the modernization work.
 
 See [matlab/FORK_EXTENSIONS.md](matlab/FORK_EXTENSIONS.md) for usage examples, limitations, and validation commands.

@@ -1,0 +1,26 @@
+function sourceInfo = crg_runtime_source_info()
+%CRG_RUNTIME_SOURCE_INFO Return source files for the OpenCRG C runtime.
+
+simulinkFolder = string(fileparts(mfilename("fullpath")));
+matlabFolder = fileparts(simulinkFolder);
+repositoryFolder = fileparts(matlabFolder);
+runtimeSourceFolder = fullfile(simulinkFolder, "src");
+baseLibSourceFolder = fullfile(repositoryFolder, "c-api", "baselib", "src");
+baseLibIncludeFolder = fullfile(repositoryFolder, "c-api", "baselib", "inc");
+
+sourceListing = dir(fullfile(baseLibSourceFolder, "*.c"));
+openCrgSources = strings(numel(sourceListing), 1);
+for sourceIndex = 1:numel(sourceListing)
+    openCrgSources(sourceIndex) = fullfile(sourceListing(sourceIndex).folder, sourceListing(sourceIndex).name);
+end
+
+sourceInfo = struct( ...
+    "RepositoryFolder", char(repositoryFolder), ...
+    "SimulinkFolder", char(simulinkFolder), ...
+    "RuntimeSourceFolder", char(runtimeSourceFolder), ...
+    "IncludePaths", {{char(runtimeSourceFolder), char(baseLibIncludeFolder)}}, ...
+    "RuntimeSource", char(fullfile(runtimeSourceFolder, "crg_runtime.c")), ...
+    "MexSource", char(fullfile(runtimeSourceFolder, "crg_runtime_mex.c")), ...
+    "SFunctionSource", char(fullfile(runtimeSourceFolder, "crg_sfun_xy2z.c")), ...
+    "OpenCrgSources", {cellstr(openCrgSources(:).')});
+end

@@ -91,6 +91,28 @@ if exist("roadrunnerHDMap", "file") == 2 && ~isempty(fixtures)
         "Lookup table struct creation");
 end
 
+if ~isempty(fixtures) && ~isempty(mex.getCompilerConfigurations("C", "Selected"))
+    try
+        buildInfo = crg_build_simulink_runtime(Target="mex", Verbose=false);
+        addpath(buildInfo.OutputFolder);
+        data = crg_read(fixtures(end).File);
+        puv = representativePuv(data, 1000);
+        pxy = crg_eval_uv2xy(data, puv);
+        runtimeHandle = crg_runtime_mex("open", fixtures(end).File, 50);
+        cleanupRuntime = onCleanup(@() crg_runtime_mex("close", runtimeHandle));
+        runtimeTime = timeit(@() crgRuntimeMexStepLoop(runtimeHandle, pxy));
+        clear cleanupRuntime
+        [metricNames, metricValues, metricUnits, metricNotes] = addMetric( ...
+            metricNames, metricValues, metricUnits, metricNotes, ...
+            "crg_runtime_mex.xy2z.1k", runtimeTime, "seconds", ...
+            "C API scalar runtime loop with 1000 x/y queries");
+    catch err
+        [metricNames, metricValues, metricUnits, metricNotes] = addMetric( ...
+            metricNames, metricValues, metricUnits, metricNotes, ...
+            "crg_runtime_mex.xy2z.available", 0, "logical", string(err.message));
+    end
+end
+
 results = table(metricNames, metricValues, metricUnits, metricNotes, ...
     VariableNames=["Metric", "Value", "Unit", "Notes"]);
 
@@ -143,6 +165,16 @@ rng("default");
 pu = linspace(data.head.ubeg, data.head.uend, pointCount).';
 pv = data.head.vmin + (data.head.vmax-data.head.vmin)*rand(pointCount, 1);
 puv = [pu pv];
+end
+
+function crgRuntimeMexStepLoop(runtimeHandle, pxy)
+for pointIndex = 1:size(pxy, 1)
+    [~, ~, ~, ~, ~, status] = crg_runtime_mex("step", ...
+        runtimeHandle, pxy(pointIndex, 1), pxy(pointIndex, 2), false);
+    if status ~= 0
+        error("CRG:runtimeError", "OpenCRG C runtime returned status %g.", status)
+    end
+end
 end
 
 function [names, values, units, notes] = addMetric(names, values, units, notes, name, value, unit, note)

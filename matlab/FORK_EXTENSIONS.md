@@ -9,6 +9,7 @@ This fork keeps the upstream ASAM OpenCRG layout and adds MATLAB-focused moderni
 - `crg_write_rrhd(..., Mode="LateralStrips")` for higher-fidelity CRG surface representation using many thin RRHD lanes.
 - `crg_write_simscape_grid` for Simscape Multibody Grid Surface variables.
 - `crg_export_lookup` for Simulink-compatible lookup-table variables.
+- `crg_sfun_xy2z` and `crg_runtime_xy2z_file` for C API backed scalar Simulink queries.
 - Regression and metrics coverage in `matlab/test/tOpenCRGModernization.m` and `matlab/test/opencrg_modernization_metrics.m`.
 
 ## Setup
@@ -133,6 +134,49 @@ Run the demo:
 run(fullfile(repo, "matlab", "demo", "crg_demo_export_lookup.m"));
 ```
 
+## Simulink C Runtime
+
+Build the C API backed runtime wrappers:
+
+```matlab
+buildInfo = crg_build_simulink_runtime(Target="all");
+addpath(buildInfo.OutputFolder);
+```
+
+Export Simulink runtime metadata and lookup fallback variables:
+
+```matlab
+runtimeFile = fullfile(tempdir, "handmade_curved_SimulinkRuntime.mat");
+runtime = crg_export_simulink_runtime(crgFile, runtimeFile);
+```
+
+The runtime supports scalar streaming queries where one `x,y` pair is evaluated per timestep. The C path uses the OpenCRG contact-point API for `xy2uv`, `uv2z`, heading and curvature, so it preserves the C API evaluation semantics for elevation and geometry.
+
+Use the MEX runtime directly:
+
+```matlab
+runtimeHandle = crg_runtime_mex("open", crgFile, runtime.HistorySize);
+cleanupRuntime = onCleanup(@() crg_runtime_mex("close", runtimeHandle));
+
+[u, v, z, phi, curvature, status] = crg_runtime_mex("step", ...
+    runtimeHandle, x, y, false);
+```
+
+Use the S-Function block with:
+
+- Function name: `crg_sfun_xy2z`
+- Parameters: `'<path-to-road.crg>', 50`
+- Inputs: scalar `x`, scalar `y`, scalar `reset`
+- Outputs: `u`, `v`, `z`, `phi`, `curvature`, `status`
+
+The code-generation helper `crg_runtime_xy2z_file` uses `coder.ceval` to call the same C runtime from generated MATLAB code. File-backed generated code expects filesystem access to the CRG file. Embedded-array deployment remains represented by the exported lookup variables and is the next backend-hardening step for targets without runtime file access.
+
+Run the demo:
+
+```matlab
+run(fullfile(repo, "matlab", "demo", "crg_demo_simulink_runtime.m"));
+```
+
 ## Metrics And Validation
 
 Collect modernization metrics:
@@ -142,7 +186,7 @@ results = opencrg_modernization_metrics();
 disp(results);
 ```
 
-The metrics include Code Analyzer issue counts, representative read/evaluation timings, RRHD object creation timings, Simscape Grid Surface variable creation timing, and lookup export timing.
+The metrics include Code Analyzer issue counts, representative read/evaluation timings, RRHD object creation timings, Simscape Grid Surface variable creation timing, lookup export timing, and C runtime scalar-loop timing when a C MEX compiler is configured.
 
 Run the MATLAB modernization regression suite:
 
