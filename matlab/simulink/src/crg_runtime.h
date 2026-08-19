@@ -11,6 +11,8 @@ extern "C" {
 #define CRG_RUNTIME_STATUS_XY2UV_FAILED    4
 #define CRG_RUNTIME_STATUS_UV2Z_FAILED     8
 #define CRG_RUNTIME_STATUS_UV2PK_FAILED    16
+#define CRG_RUNTIME_STATUS_ORIENT_FAILED   32
+#define CRG_RUNTIME_STATUS_INVALID_INPUT   64
 
 typedef struct CrgRuntimeContextTag {
     int dataSetId;
@@ -38,6 +40,18 @@ int crgRuntimeStepXY(CrgRuntimeContext* context,
                      double* phi,
                      double* curvature);
 
+int crgRuntimeStepTirePlaneXY(CrgRuntimeContext* context,
+                              double x,
+                              double y,
+                              int resetRequested,
+                              double* px,
+                              double* py,
+                              double* pz,
+                              double* iuCurrent,
+                              double* qx,
+                              double* qy,
+                              double* qz);
+
 void crgRuntimeTerminate(CrgRuntimeContext* context);
 
 int crgRuntimeSingletonInitializeFromFile(const char* fileName,
@@ -52,6 +66,17 @@ int crgRuntimeSingletonStepXY(double x,
                               double* z,
                               double* phi,
                               double* curvature);
+
+int crgRuntimeSingletonStepTirePlaneXY(double x,
+                                       double y,
+                                       int resetRequested,
+                                       double* px,
+                                       double* py,
+                                       double* pz,
+                                       double* iuCurrent,
+                                       double* qx,
+                                       double* qy,
+                                       double* qz);
 
 void crgRuntimeSingletonTerminate(void);
 

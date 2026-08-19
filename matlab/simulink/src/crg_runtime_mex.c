@@ -138,6 +138,63 @@ static void crgMexStep(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[
     }
 }
 
+static void crgMexPlane(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
+{
+    double x;
+    double y;
+    int resetRequested = 0;
+    double px;
+    double py;
+    double pz;
+    double iuCurrent;
+    double qx;
+    double qy;
+    double qz;
+    int status;
+
+    if (nrhs < 4) {
+        mexErrMsgIdAndTxt("OpenCRG:runtime:plane", "Plane command requires handle, x, and y.");
+    }
+    if (nlhs > 8) {
+        mexErrMsgIdAndTxt("OpenCRG:runtime:plane", "Plane command returns up to eight outputs.");
+    }
+
+    crgMexEnsureDefaults();
+    x = mxGetScalar(prhs[2]);
+    y = mxGetScalar(prhs[3]);
+    if (nrhs >= 5) {
+        resetRequested = mxGetScalar(prhs[4]) != 0.0;
+    }
+
+    status = crgRuntimeStepTirePlaneXY(&runtimeContext, x, y, resetRequested,
+        &px, &py, &pz, &iuCurrent, &qx, &qy, &qz);
+
+    if (nlhs > 0) {
+        plhs[0] = mxCreateDoubleScalar(px);
+    }
+    if (nlhs > 1) {
+        plhs[1] = mxCreateDoubleScalar(py);
+    }
+    if (nlhs > 2) {
+        plhs[2] = mxCreateDoubleScalar(pz);
+    }
+    if (nlhs > 3) {
+        plhs[3] = mxCreateDoubleScalar(iuCurrent);
+    }
+    if (nlhs > 4) {
+        plhs[4] = mxCreateDoubleScalar(qx);
+    }
+    if (nlhs > 5) {
+        plhs[5] = mxCreateDoubleScalar(qy);
+    }
+    if (nlhs > 6) {
+        plhs[6] = mxCreateDoubleScalar(qz);
+    }
+    if (nlhs > 7) {
+        plhs[7] = mxCreateDoubleScalar((double)status);
+    }
+}
+
 void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
     char* command;
@@ -153,6 +210,9 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     } else if (strcmp(command, "step") == 0) {
         mxFree(command);
         crgMexStep(nlhs, plhs, nrhs, prhs);
+    } else if (strcmp(command, "plane") == 0) {
+        mxFree(command);
+        crgMexPlane(nlhs, plhs, nrhs, prhs);
     } else if (strcmp(command, "close") == 0) {
         mxFree(command);
         crgMexClose();

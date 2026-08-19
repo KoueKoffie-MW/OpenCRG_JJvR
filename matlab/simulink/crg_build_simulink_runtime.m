@@ -25,7 +25,8 @@ commonSources = [string(sourceInfo.RuntimeSource), string(sourceInfo.OpenCrgSour
 buildInfo = struct( ...
     "OutputFolder", char(outputFolder), ...
     "MexFile", char(fullfile(outputFolder, "crg_runtime_mex." + mexext())), ...
-    "SFunctionFile", char(fullfile(outputFolder, "crg_sfun_xy2z." + mexext())));
+    "SFunctionFile", char(fullfile(outputFolder, "crg_sfun_xy2z." + mexext())), ...
+    "TirePlaneSFunctionFile", char(fullfile(outputFolder, "crg_sfun_tire_plane." + mexext())));
 
 if target == "all" || target == "mex"
     if options.Verbose
@@ -42,6 +43,13 @@ if target == "all" || target == "sfunction"
     end
     mexArguments = ["-outdir", outputFolder, includeArguments, ...
         string(sourceInfo.SFunctionSource), commonSources];
+    mex(mexArguments{:});
+
+    if options.Verbose
+        fprintf("Building crg_sfun_tire_plane in %s\n", outputFolder);
+    end
+    mexArguments = ["-outdir", outputFolder, includeArguments, ...
+        string(sourceInfo.TirePlaneSFunctionSource), commonSources];
     mex(mexArguments{:});
 end
 

@@ -21,8 +21,9 @@ Fork extensions:
 This fork also contains MATLAB exporters for RoadRunner HD Map (.rrhd)
 files, Simscape Multibody Grid Surface variables and Simulink-compatible
 lookup-table variables. It also contains a C API backed Simulink runtime
-for scalar x/y road queries. See FORK_EXTENSIONS.md in this folder for
-usage examples, limitations and validation commands.
+for scalar x/y road queries, a codegen-safe road-surface lookup path with friction and normals, an experimental tire-plane S-Function path, and FBX/Simulink 3D Actor road mesh export.
+See FORK_EXTENSIONS.md in this folder for usage examples, limitations and
+validation commands.
 
 
 Hint on memory limitations: with 32bit MATLAB available memory is sometimes
