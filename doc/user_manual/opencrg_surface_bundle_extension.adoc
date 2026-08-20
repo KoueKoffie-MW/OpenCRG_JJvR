@@ -1,0 +1,116 @@
+= OpenCRG Surface Bundle Extension
+
+[IMPORTANT]
+====
+This document describes a MATLAB extension in this repository. An OpenCRG
+surface bundle is not part of the ASAM OpenCRG standard. The road CRG remains
+a standard OpenCRG file; the additional property CRGs and JSON manifest are a
+repository-specific delivery convention.
+====
+
+== Purpose
+
+`crg_create_surface_bundle` derives a matched set of road-surface property
+files from one input CRG. The bundle stores precomputed global normal vectors
+and constant default road properties, so a simulation can load the data once
+instead of calculating these values at every query.
+
+Create a bundle:
+
+[source,matlab]
+----
+addpath("matlab/lib")
+
+[bundle, manifest] = crg_create_surface_bundle( ...
+    "crg-txt/handmade_curved.crg", fullfile(tempdir, "OpenCRGBundle"), ...
+    BundleName="handmade_curved", ...
+    NormalSmoothingSigma=[0.05 0.05]);
+----
+
+The function does not overwrite existing bundle files unless `Overwrite=true`
+is supplied.
+
+== Bundle Contents
+
+For bundle name `road`, the generator creates:
+
+* `road_road.crg`: byte-for-byte copy of the input road CRG.
+* `road_friction.crg`: friction coefficient.
+* `road_nx.crg`, `road_ny.crg`, `road_nz.crg`: unit normal components in the
+  global x, y, and z directions.
+* `road_material_id.crg`: material identifier.
+* `road_roughness.crg`, `road_wetness.crg`, `road_temperature_c.crg`, and
+  `road_rolling_resistance.crg`: additional scalar properties.
+* `road.opencrg-bundle.json`: authoritative manifest containing file names,
+  grid metadata, units, interpolation rules, normal settings, and defaults.
+
+Every property file uses the same u/v grid as `road_road.crg`. The property
+files use the OpenCRG elevation grid as a scalar carrier; their semantics are
+defined by the manifest, not by the OpenCRG standard.
+
+== Defaults And Normal Processing
+
+The default on-road values are friction `1.0`, material ID `1`, roughness `0`,
+wetness `0`, temperature `25 degC`, and rolling resistance coefficient
+`0.015`. The manifest also records default off-road values: friction `0.7`,
+material ID `2`, roughness `0`, wetness `0`, temperature `25 degC`, and
+rolling resistance coefficient `0.015`.
+
+Normals are area-weighted surface-triangle normals, oriented upward and
+normalized. `NormalSmoothingSigma=[0 0]` preserves the derived normals.
+Provide positive Gaussian standard deviations in metres as `[u v]` to smooth
+them, for example `NormalSmoothingSigma=[0.05 0.10]`. For a closed road,
+`ClosedTrack="auto"` detects the OpenCRG closed-reference-line option and
+wraps smoothing along u. Use `ClosedTrack=true` or `ClosedTrack=false` to
+override that detection.
+
+All road-property defaults, blend width, and normal settings can be changed
+through the name-value options of `crg_create_surface_bundle`.
+
+== Load And Query A Bundle
+
+Load the manifest or its containing folder once:
+
+[source,matlab]
+----
+[bundle, metadata] = crg_export_surface_bundle_lookup( ...
+    bundle.ManifestFile, Precision="single");
+----
+
+Use `crg_surface_bundle_terrain_lookup` for scalar global x/y queries. It
+returns height, global normal components, friction, material ID, roughness,
+wetness, temperature, rolling resistance, road weight, distance to the road,
+and a status of `"road"`, `"blend"`, `"terrain"`, or `"invalid"`.
+
+== Terrain Grid And Blend
+
+Prepare an off-road terrain grid before querying. Its `x` and `y` fields must
+be strictly increasing global-coordinate vectors, and `z` must be a finite
+matrix with size `[numel(x) numel(y)]`. Optional property fields are
+`friction`, `materialId`, `roughness`, `wetness`, `temperatureC`, and
+`rollingResistance`. Supply all of `normalX`, `normalY`, and `normalZ`, or
+supply none; when absent, the preparation function derives normalized upward
+normals from `z`.
+
+[source,matlab]
+----
+terrainInput = struct( ...
+    "x", xTerrain, ...
+    "y", yTerrain, ...
+    "z", zTerrain);
+terrain = crg_prepare_terrain_grid(terrainInput);
+
+surface = crg_surface_bundle_terrain_lookup(xQuery, yQuery, bundle, terrain);
+----
+
+Inside the road boundary, the query uses only the bundle. Outside it, the
+nearest road-boundary value is blended with terrain over `bundle.BlendWidth`,
+which defaults to `2.0 m`. The road weight changes linearly from `1` at the
+boundary to `0` at the outer edge of the buffer. Height and continuous
+properties blend linearly; normals blend then renormalize; material ID selects
+the road value at road weight `>= 0.5` and the terrain value otherwise.
+
+The terrain grid must cover a query point. A query outside its x/y limits
+returns status `"invalid"` rather than extrapolating. For an open road, the
+blend boundary includes the side edges and end caps. For a closed road, it
+uses the joined side edges without artificial start or end caps.
