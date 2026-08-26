@@ -53,24 +53,50 @@ end
 
 function [segmentIndex, projection, lateralDistance, isValidProjection] = localProjectToReference(x, y, iuPrev, road)
 numSegments = max(1, int32(road.numU) - 1);
-startIndex = localPreviousIndex(iuPrev, numSegments);
 radius = int32(road.localSearchRadius);
-firstIndex = max(int32(1), startIndex - radius);
-lastIndex = min(numSegments, startIndex + radius);
-
-[segmentIndex, projection, lateralDistance, distanceSquared] = localSearchSegments(x, y, firstIndex, lastIndex, road);
 maxLocalDistanceSquared = road.maxLocalDistance*road.maxLocalDistance;
-if (~isfinite(iuPrev)) || iuPrev < 1.0 || iuPrev > double(numSegments) || ...
-        distanceSquared > maxLocalDistanceSquared
+
+hasValidPrevious = isfinite(iuPrev) && iuPrev >= 1.0 && iuPrev <= double(numSegments);
+if hasValidPrevious
+    startIndex = localPreviousIndex(iuPrev, numSegments);
+    firstIndex = max(int32(1), startIndex - radius);
+    lastIndex = min(numSegments, startIndex + radius);
+    [segmentIndex, projection, lateralDistance, distanceSquared] = ...
+        localSearchSegments(x, y, firstIndex, lastIndex, road);
+
+    uValue = localInterpolateU(segmentIndex, projection, road);
+    needsGlobalSearch = ~isfinite(distanceSquared) || ...
+        distanceSquared > maxLocalDistanceSquared || ...
+        localHitsSearchBoundary(segmentIndex, firstIndex, lastIndex, numSegments) || ...
+        ~localInsideUv(uValue, lateralDistance, road);
+else
+    distanceSquared = realmax("double");
+    segmentIndex = int32(1);
+    projection = 0.0;
+    lateralDistance = 0.0;
+    needsGlobalSearch = true;
+end
+
+if needsGlobalSearch
     [coarseSegment, ~, ~, ~] = localSearchCoarse(x, y, road);
     refineRadius = int32(road.coarseRefineRadius);
     firstIndex = max(int32(1), coarseSegment - refineRadius);
     lastIndex = min(numSegments, coarseSegment + refineRadius);
     [segmentIndex, projection, lateralDistance, distanceSquared] = ...
         localSearchSegments(x, y, firstIndex, lastIndex, road);
+
+    if localHitsSearchBoundary(segmentIndex, firstIndex, lastIndex, numSegments)
+        [segmentIndex, projection, lateralDistance, distanceSquared] = ...
+            localSearchSegments(x, y, int32(1), numSegments, road);
+    end
 end
 
 isValidProjection = isfinite(distanceSquared) && segmentIndex >= int32(1) && segmentIndex <= numSegments;
+end
+
+function tf = localHitsSearchBoundary(segmentIndex, firstIndex, lastIndex, numSegments)
+tf = (segmentIndex == firstIndex && firstIndex > int32(1)) || ...
+    (segmentIndex == lastIndex && lastIndex < numSegments);
 end
 
 function startIndex = localPreviousIndex(iuPrev, numSegments)
